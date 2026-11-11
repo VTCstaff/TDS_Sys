@@ -1,293 +1,532 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="strict-origin-when-cross-origin">
-<title>おうちハーバーショー</title>
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>おうちハーバー卓</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
 <style>
-/* Layout: 夜のメディテレーニアンハーバー。上にカウントダウンの「灯り」、下に進行表とファイル棚の一列構成 */
+/* Layout: 上に送出状況（時計・LCD・トランスポート）、中央にチャンネルストリップ4本、下にキューシートとショー編集 */
 :root{
-  --night:#0c1424; --deep:#121d33; --panel:#17243e; --line:#2a3a5c;
-  --text:#ecebe4; --muted:#9aa6bf; --gold:#e8b85c; --gold-soft:rgba(232,184,92,.14);
-  --sea:#4fb0c6; --warn:#e07a5f;
-  --display:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --chassis:#15171b; --panel:#1e2127; --panel2:#262a32; --groove:#0b0c0f; --line:#343944;
+  --text:#e7e9ee; --muted:#8a92a3; --amber:#ffb341; --green:#4be08a; --red:#ff5a4e; --blue:#5ab8ff;
+  --lcd:#140f06;
+  --label:"Barlow Condensed","Zen Kaku Gothic New",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
   --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-body{background:var(--night);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.7;
-  background-image:radial-gradient(ellipse 120% 60% at 50% -10%,#1d2c4d 0%,transparent 60%);
-  min-height:100%}
-.wrap{max-width:760px;margin:0 auto;padding-block:28px 64px;
+html,body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--chassis);color:var(--text);font-family:var(--body);font-size:14px;line-height:1.6;
+  background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 1px,transparent 1px 3px)}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 60px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  display:flex;flex-direction:column;gap:28px}
-h1{font-family:var(--display);font-weight:700;font-size:1.6rem;margin:0;letter-spacing:.04em;text-wrap:balance}
-.sub{color:var(--muted);margin:2px 0 0;font-size:.88rem}
-.hero{display:flex;flex-direction:column;gap:14px;padding:28px 22px;border:1px solid var(--line);border-radius:14px;
-  background:linear-gradient(180deg,var(--deep),var(--night))}
-.label{font-size:.75rem;letter-spacing:.14em;color:var(--muted)}
-.count{font-family:var(--display);font-size:clamp(2.6rem,11vw,4.4rem);font-weight:700;line-height:1;
-  font-variant-numeric:tabular-nums;color:var(--gold);letter-spacing:.02em}
-.now{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
-.pill{display:inline-flex;align-items:center;gap:8px;padding:4px 12px;border-radius:999px;background:var(--gold-soft);
-  color:var(--gold);font-weight:700;font-size:.85rem}
-.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
-.pill.off{background:rgba(154,166,191,.12);color:var(--muted)}
-.pill.closed{background:rgba(224,122,95,.14);color:var(--warn)}
-.track{font-size:.9rem;color:var(--muted);min-width:0;overflow-wrap:anywhere}
-.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);
-  padding:9px 16px}
-button:hover{border-color:var(--muted)}
-button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-button.primary{background:var(--gold);color:#1a1405;border-color:var(--gold);font-weight:700;padding:11px 22px}
-button.small{padding:5px 11px;font-size:.82rem}
-section{display:flex;flex-direction:column;gap:12px}
-h2{font-family:var(--display);font-size:1.15rem;margin:0}
-.row{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center}
-.row label{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.9rem}
-input[type=time]{font:inherit;font-size:1.1rem;font-variant-numeric:tabular-nums;background:var(--panel);color:var(--text);
-  border:1px solid var(--line);border-radius:8px;padding:6px 10px}
-input[type=range]{accent-color:var(--gold);width:140px}
-.timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-.timeline li{display:grid;grid-template-columns:4.2em 1fr;gap:12px;padding:9px 12px;border-left:2px solid var(--line);
-  position:relative}
-.timeline li::before{content:"";position:absolute;left:-6px;top:16px;width:10px;height:10px;border-radius:50%;
-  background:var(--night);border:2px solid var(--line)}
-.timeline li.done{color:var(--muted)}
-.timeline li.done::before{background:var(--line)}
-.timeline li.active{background:var(--gold-soft);border-left-color:var(--gold);border-radius:0 8px 8px 0}
-.timeline li.active::before{border-color:var(--gold);background:var(--gold)}
-.t{font-variant-numeric:tabular-nums;font-weight:700;color:var(--sea)}
-.slots{display:flex;flex-direction:column;gap:8px}
-.slot{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:12px 14px;background:var(--panel);
-  border-radius:10px;border:1px solid transparent}
-.slot.missing{border-color:rgba(224,122,95,.4)}
-.slot .name{font-weight:700;min-width:0}
-.slot .file{grid-column:1;color:var(--muted);font-size:.82rem;min-width:0;overflow-wrap:anywhere}
-.slot .acts{grid-column:2;grid-row:1/3;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.slot input[type=file]{display:none}
-.yt{grid-column:1/-1;display:flex;gap:6px;min-width:0}
-.yt input{flex:1;min-width:0;font:inherit;font-size:.85rem;background:var(--night);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
-.tag{font-size:.7rem;padding:1px 7px;border-radius:6px;background:rgba(79,176,198,.15);color:var(--sea);margin-left:6px;font-weight:700}
+  display:flex;flex-direction:column;gap:18px}
+.cap-label{font-family:var(--label);font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-size:.78rem}
+button{font:inherit;cursor:pointer;color:var(--text);background:var(--panel2);border:1px solid #000;border-radius:5px;padding:7px 12px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 0 rgba(0,0,0,.6)}
+button:hover{background:#2f343e}
+button:active{transform:translateY(1px)}
+button:focus-visible,input:focus-visible,select:focus-visible,.fader:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.key{font-family:var(--label);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+input,select{font:inherit;color:var(--text);background:var(--groove);border:1px solid var(--line);border-radius:5px;padding:5px 8px;min-width:0}
+input[type=time]{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---- top bar ---- */
+.top{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;background:var(--panel);border:1px solid #000;border-radius:10px;padding:14px 16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.brand{display:flex;flex-direction:column;line-height:1.1}
+.brand b{font-family:var(--label);font-size:1.5rem;letter-spacing:.06em}
+.brand span{color:var(--muted);font-size:.78rem}
+.clock{font-family:var(--mono);font-size:1.9rem;font-weight:600;font-variant-numeric:tabular-nums;justify-self:center;letter-spacing:.04em}
+.transport{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.lamp{font-family:var(--label);font-weight:700;letter-spacing:.14em;padding:5px 10px;border-radius:4px;border:1px solid #000;color:#5a2420;background:#2a1513}
+.lamp.on{color:#fff;background:var(--red);box-shadow:0 0 16px rgba(255,90,78,.55)}
+.testbadge{font-family:var(--label);font-weight:700;letter-spacing:.1em;color:var(--blue);border:1px solid var(--blue);border-radius:4px;padding:3px 8px;display:flex;gap:6px;align-items:center}
+.testbadge button{padding:1px 7px;font-size:.75rem}
+#runBtn{min-width:96px}
+#runBtn.on{background:#1d3b2a;color:var(--green);border-color:#0a1a10}
+#panicBtn{background:#3a1715;color:#ffb3ad}
+
+/* ---- LCD ---- */
+.lcd{display:grid;grid-template-columns:1fr auto;gap:6px 18px;background:var(--lcd);border:2px solid #000;border-radius:8px;padding:14px 18px;
+  box-shadow:inset 0 0 24px rgba(0,0,0,.8);color:var(--amber);font-family:var(--mono)}
+.lcd .l1{font-family:var(--body);font-weight:700;font-size:1.25rem;text-shadow:0 0 8px rgba(255,179,65,.35);min-width:0;overflow-wrap:anywhere}
+.lcd .l2{color:#b98636;font-size:.85rem;min-width:0;overflow-wrap:anywhere}
+.lcd .t{text-align:right;font-variant-numeric:tabular-nums}
+.bar{grid-column:1/-1;height:6px;background:#2a1d08;border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.nextrow{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#b98636;font-size:.85rem;border-top:1px dashed #3a2a10;padding-top:8px}
+.nextrow b{color:var(--amber);font-variant-numeric:tabular-nums}
+
+/* ---- strips ---- */
+.console{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;background:var(--panel);border:1px solid #000;border-radius:10px;padding:14px}
+.strip{display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--panel2);border:1px solid #000;border-radius:8px;padding:12px 8px;min-width:0}
+.strip.master{background:#2b2620}
+.chname{font-family:var(--label);font-weight:700;font-size:1.15rem;letter-spacing:.1em}
+.chsub{color:var(--muted);font-size:.75rem;margin-top:-10px;text-align:center}
+.mf{display:flex;gap:8px;align-items:stretch;height:230px}
+.meter{position:relative;width:12px;background:var(--groove);border:1px solid #000;border-radius:2px;overflow:hidden}
+.meter i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(to top,var(--green) 0 62%,var(--amber) 62% 85%,var(--red) 85%);
+  background-size:100% 230px;background-position:bottom}
+.meter::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(to top,transparent 0 4px,var(--groove) 4px 5px)}
+.meter b{position:absolute;left:0;right:0;height:2px;background:#fff;bottom:0;opacity:.8}
+.scale{position:relative;width:30px;font-family:var(--mono);font-size:.62rem;color:var(--muted)}
+.scale span{position:absolute;right:0;transform:translateY(50%)}
+.scale span.u{color:var(--amber)}
+.fader{position:relative;width:44px;touch-action:none;cursor:ns-resize}
+.fader::before{content:"";position:absolute;left:50%;top:11px;bottom:11px;width:6px;margin-left:-3px;background:var(--groove);border-radius:3px;box-shadow:inset 0 0 0 1px #000}
+.fader .cap{position:absolute;left:2px;right:2px;height:22px;border-radius:3px;border:1px solid #000;
+  background:linear-gradient(#e2e5ea,#a6adb9 45%,#7d8592 55%,#c3c8d0);box-shadow:0 3px 6px rgba(0,0,0,.6)}
+.fader .cap::after{content:"";position:absolute;left:4px;right:4px;top:10px;height:2px;background:#222}
+.master .fader .cap{background:linear-gradient(#ffd9a0,#e09a3a 45%,#b8761e 55%,#f0b45c)}
+.val{font-family:var(--mono);font-size:.8rem;font-variant-numeric:tabular-nums;text-align:center;line-height:1.3}
+.val small{display:block;color:var(--muted)}
+.sbtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.sbtns button{padding:4px 8px;font-size:.78rem}
+.mute.on{background:#4a1a17;color:#ffb3ad}
+.lim.on{background:#3a2c12;color:var(--amber)}
+.ytled{font-family:var(--label);font-size:.72rem;letter-spacing:.1em;color:#4a3030;border:1px solid #3a2626;border-radius:3px;padding:0 5px}
+.ytled.on{color:#fff;background:#c4302b;border-color:#c4302b}
+.consolenote{grid-column:1/-1;color:var(--muted);font-size:.78rem;margin:0}
+
+/* ---- sections ---- */
+section{background:var(--panel);border:1px solid #000;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.sechead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+h2{margin:0;font-family:var(--label);font-weight:700;letter-spacing:.1em;font-size:1.05rem;text-transform:uppercase}
+h2 small{font-family:var(--body);font-weight:500;letter-spacing:0;color:var(--muted);margin-left:8px;font-size:.8rem}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+td{padding:6px 8px;border-top:1px solid var(--line);vertical-align:middle}
+td.tm{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--blue);width:1%}
+td.st{width:1%;white-space:nowrap;text-align:right}
+tr.done td{color:#5d6473}
+tr.done td.tm{color:#4b5566}
+tr.active td{background:rgba(255,179,65,.1);color:var(--amber)}
+tr.next td.st .chip{color:var(--green);border-color:var(--green)}
+.chip{font-family:var(--label);font-weight:600;font-size:.72rem;letter-spacing:.08em;border:1px solid var(--line);border-radius:3px;padding:1px 6px;color:var(--muted)}
+.warn{color:var(--red);font-size:.78rem}
+.dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:1px}
+
+/* ---- editor ---- */
+.show{border:1px solid var(--line);border-radius:8px;background:var(--panel2);display:flex;flex-direction:column}
+.show.off{opacity:.55}
+.showhead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #000;border-left:4px solid var(--c,var(--amber));border-radius:8px 8px 0 0}
+.showhead .nm{flex:1 1 220px;font-weight:700}
+.showbody{display:flex;flex-direction:column;gap:12px;padding:12px}
+.rowl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rowl label{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:.85rem}
+.items{display:flex;flex-direction:column;gap:6px}
+.item{display:grid;grid-template-columns:auto minmax(120px,1fr) minmax(0,2fr) auto;gap:8px;align-items:center;background:var(--panel);border:1px solid #000;border-radius:6px;padding:6px 8px}
+.item .n{font-family:var(--mono);color:var(--muted);font-size:.8rem;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.item .n input{width:4.6em;text-align:right;padding:5px 4px}
+.item .acts{display:flex;gap:4px}
+.item .acts button{padding:3px 8px;font-size:.78rem}
+.src{display:flex;gap:4px;align-items:center;min-width:0;flex-wrap:wrap}
+.src .nm{flex:1 1 100%;font-size:.78rem;color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.src .nm.none{color:var(--red)}
+.src input{flex:1 1 140px;font-size:.8rem}
+.src button{padding:3px 8px;font-size:.75rem}
+.tag{font-family:var(--label);font-weight:700;font-size:.68rem;letter-spacing:.08em;padding:0 5px;border-radius:3px;margin-right:4px}
+.tag.yt{background:#c4302b;color:#fff}
+.tag.fl{background:#24425a;color:#bfe3ff}
+.add{align-self:flex-start;padding:4px 10px;font-size:.8rem}
+.hint{color:var(--muted);font-size:.8rem;margin:0;max-width:70ch}
 #ythost{position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden}
-.note{color:var(--muted);font-size:.85rem;margin:0;max-width:65ch}
-.note strong{color:var(--text)}
-@media (prefers-reduced-motion:no-preference){.pill::before{animation:blink 2s ease-in-out infinite}}
-@keyframes blink{50%{opacity:.35}}
-</style></head><body>
+
+@media (max-width:760px){
+  .top{grid-template-columns:1fr auto}
+  .clock{grid-column:1/-1;grid-row:2;justify-self:start}
+  .console{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .item{grid-template-columns:auto minmax(0,1fr) auto}
+  .item .src{grid-column:1/-1;grid-row:2}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
 <div class="wrap">
-  <header>
-    <h1>おうちハーバーショー</h1>
-    <p class="sub">ビリーヴ!〜シー・オブ・ドリームス〜の時刻に合わせて、家で同じ流れを再生します</p>
-  </header>
-  <div class="hero" aria-live="polite">
-    <span class="label" id="countLabel">次の公演まで</span>
-    <div class="count" id="count">--:--:--</div>
-    <div class="now">
-      <span class="pill off" id="phase">停止中</span>
-      <span class="track" id="track">「開始」を押すと時刻に合わせて自動で流れます</span>
-    </div>
-    <div class="controls">
-      <button class="primary" id="startBtn">開始</button>
-      <button id="testBtn">テスト：5分前から</button>
-      <button id="resetTestBtn" hidden>テスト終了</button>
-      <label class="row" style="gap:8px;color:var(--muted);font-size:.9rem">音量 <input type="range" id="vol" min="0" max="1" step="0.01" value="0.9"></label>
+
+  <div class="top">
+    <div class="brand"><b>HARBOR CONSOLE</b><span>おうちハーバー卓</span></div>
+    <div class="clock" id="clock">--:--:--</div>
+    <div class="transport">
+      <span class="testbadge" id="testBadge" hidden>TEST <button id="testOff">解除</button></span>
+      <span class="lamp" id="lamp">ON AIR</span>
+      <button class="key" id="runBtn">開始</button>
+      <button class="key" id="panicBtn" title="すべての音を即停止">PANIC</button>
     </div>
   </div>
+
+  <div class="lcd" aria-live="polite">
+    <div class="l1" id="lcd1">STOP</div>
+    <div class="t" id="lcdT">--:-- / --:--</div>
+    <div class="l2" id="lcd2">「開始」で自動運行</div>
+    <div></div>
+    <div class="bar"><i id="lcdBar"></i></div>
+    <div class="nextrow"><span id="nextLabel">次のキュー：—</span><b id="nextCount">--:--:--</b></div>
+  </div>
+
+  <div class="console" id="console"></div>
+
   <section>
-    <h2>公演時刻</h2>
-    <div class="row">
-      <label for="showTime">本編スタート <input type="time" id="showTime" value="19:30"></label>
-      <label><input type="checkbox" id="duck" checked> アナウンス中はBGMを止める</label>
-    </div>
-    <p class="note">公演時刻は日によって変わるので、公式サイトのショースケジュールで確認して入力してください。公式発表の休止日（2026/11/27、2027/1/6〜2/4）は自動で翌公演日に送ります。</p>
+    <div class="sechead"><h2>Cue Sheet<small>次の公演までの進行</small></h2></div>
+    <div class="tablewrap"><table><tbody id="cues"></tbody></table></div>
   </section>
+
   <section>
-    <h2>今日の進行</h2>
-    <ol class="timeline" id="timeline"></ol>
+    <div class="sechead"><h2>Harbor BGM<small>通常時にループ</small></h2></div>
+    <div id="bgmSrc"></div>
+    <div class="rowl"><label><input type="checkbox" id="duck"> アナウンス中はBGMを止める（オフなら小さくして重ねる）</label></div>
   </section>
+
   <section>
-    <h2>音源</h2>
-    <p class="note">各枠に<strong>音声ファイル</strong>を選ぶか、<strong>YouTubeのURL</strong>を貼って「設定」を押してください。設定はこのブラウザに保存されます。YouTubeは投稿者が埋め込みを許可している動画だけ再生できます。</p>
-    <div class="slots" id="slots"></div>
+    <div class="sechead"><h2>Shows<small>ショーごとの開始前アナウンスと本番の流れ</small></h2>
+      <button class="add" id="addShow">＋ ショーを追加</button></div>
+    <p class="hint">時刻になると「開始前アナウンス」が指定の分数前に流れ、本番は上から順に続けて再生します。閉園アナウンスのように1本だけ流したいものは、本番に1つだけ入れて「終了後」を「BGMを止める」にしてください。休止日は「2026-11-27, 2027-01-06~2027-02-04」のように書けます。</p>
+    <div id="shows" style="display:flex;flex-direction:column;gap:12px"></div>
   </section>
 </div>
+<input type="file" id="picker" accept="audio/*,video/mp4" hidden>
 <div id="ythost"><div id="yt_bgm"></div><div id="yt_fg"></div></div>
-<script>
-const SLOTS=[
- {id:'bgm',name:'メディテレーニアンハーバーBGM',hint:'通常時ループ'},
- {id:'a60',name:'1時間前アナウンス',off:3600},{id:'a30',name:'30分前アナウンス',off:1800},
- {id:'a15',name:'15分前アナウンス',off:900},{id:'a5',name:'5分前アナウンス',off:300},
- {id:'show',name:'ビリーヴ!本編'},{id:'song',name:'君の願いが世界を輝かす'},{id:'after',name:'終了後アナウンス'}];
-const NAME=Object.fromEntries(SLOTS.map(s=>[s.id,s.name]));
-const CLOSED=new Set(['2026-11-27']);
-for(let d=new Date(2027,0,6);d<=new Date(2027,1,4);d.setDate(d.getDate()+1))CLOSED.add(key(d));
-function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-const $=id=>document.getElementById(id);
-const srcs={},dur={};
-let running=false,phase='idle',fgId=null,fired=new Set(),offset=0,wake=null,master=0.9;
-const now=()=>new Date(Date.now()+offset);
 
-/* ---------- YouTube ---------- */
+<script>
+/* ===== 基本 ===== */
+const $=id=>document.getElementById(id);
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}};
+const uid=()=>Math.random().toString(36).slice(2,10);
+const pad=n=>String(n).padStart(2,'0');
+const key=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const hm=d=>pad(d.getHours())+':'+pad(d.getMinutes());
+const hms=s=>{s=Math.max(0,Math.floor(s));return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60)};
+const ms=s=>{s=Math.max(0,Math.floor(s||0));return pad(Math.floor(s/60))+':'+pad(s%60)};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function ytId(u){u=(u||'').trim();const m=u.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/);return m?m[1]:(/^[\w-]{11}$/.test(u)?u:null)}
+function pd(s){const m=(s||'').trim().match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/);return m?new Date(+m[1],m[2]-1,+m[3]):null}
+const closedCache=new Map();
+function parseClosed(str){if(closedCache.has(str))return closedCache.get(str);const set=new Set();
+  (str||'').split(/[,、\s]+/).forEach(t=>{if(!t)return;const [a,b]=t.split(/[~〜]/);const da=pd(a);if(!da)return;
+    if(b){const db=pd(b);if(!db)return;for(let d=new Date(da);d<=db;d.setDate(d.getDate()+1))set.add(key(d))}else set.add(key(da))});
+  closedCache.set(str,set);return set}
+const COLORS=['#ffb341','#5ab8ff','#4be08a','#ff7ab8','#b48cff','#ff7a45'];
+
+/* ===== 設定（旧版からの引き継ぎつき） ===== */
+const CFG_KEY='harbor-console-v2';
+function legacy(k){const u=ls.get('yt_'+k),id=u&&ytId(u);return id?{type:'yt',id,name:u}:{type:'file',key:k,name:'',legacy:true}}
+function defaults(){return{bgm:legacy('bgm'),faders:{bgm:100,ann:100,show:100,master:100},mutes:{},limiter:true,duck:true,shows:[
+  {id:uid(),name:'ビリーヴ!〜シー・オブ・ドリームス〜',time:ls.get('showTime')||'19:30',on:true,after:'bgm',closed:'2026-11-27, 2027-01-06~2027-02-04',
+   pre:[{min:60,label:'1時間前アナウンス',src:legacy('a60')},{min:30,label:'30分前アナウンス',src:legacy('a30')},
+        {min:15,label:'15分前アナウンス',src:legacy('a15')},{min:5,label:'5分前アナウンス',src:legacy('a5')}],
+   seq:[{label:'本編',src:legacy('show')},{label:'君の願いが世界を輝かす',src:legacy('song')},{label:'終了後アナウンス',src:legacy('after')}]},
+  {id:uid(),name:'閉園アナウンス',time:'21:00',on:true,after:'stop',closed:'',pre:[],seq:[{label:'閉園アナウンス',src:null}]}]}}
+let cfg=null;try{cfg=JSON.parse(ls.get(CFG_KEY))}catch(e){}
+if(!cfg||!Array.isArray(cfg.shows))cfg=defaults();
+const save=()=>ls.set(CFG_KEY,JSON.stringify(cfg));
+let durs={};try{durs=JSON.parse(ls.get('harbor-durs'))||{}}catch(e){}
+const srcKey=s=>s?(s.type==='yt'?s.id:s.key):'';
+const durOf=s=>s?(durs[srcKey(s)]||0):0;
+function setDur(s,d){if(s&&d>0&&Math.abs((durs[srcKey(s)]||0)-d)>1){durs[srcKey(s)]=d;ls.set('harbor-durs',JSON.stringify(durs))}}
+
+/* ===== 音声ファイル保存（IndexedDB） ===== */
+const blobs={};let db=null;
+function openDB(){return new Promise(r=>{try{const q=indexedDB.open('believe-home',1);q.onupgradeneeded=()=>q.result.createObjectStore('files');
+  q.onsuccess=()=>{db=q.result;r()};q.onerror=()=>r()}catch(e){r()}})}
+function dbPut(k,v){try{db&&db.transaction('files','readwrite').objectStore('files').put(v,k)}catch(e){}}
+function dbAll(){return new Promise(r=>{if(!db)return r({});try{const out={},c=db.transaction('files').objectStore('files').openCursor();
+  c.onsuccess=()=>{const x=c.result;if(x){out[x.key]=x.value;x.continue()}else r(out)};c.onerror=()=>r({})}catch(e){r({})}})}
+function addBlob(k,blob,name){blobs[k]={blob,name,url:URL.createObjectURL(blob)};
+  const a=new Audio();a.preload='metadata';a.src=blobs[k].url;a.onloadedmetadata=()=>{setDur({type:'file',key:k},a.duration);renderCues(now(),true)}}
+const usable=s=>!!s&&(s.type==='yt'||(s.type==='file'&&!!blobs[s.key]));
+function allRefs(){const r=[{o:cfg,p:'bgm'}];cfg.shows.forEach(s=>{s.pre.forEach(x=>r.push({o:x,p:'src'}));s.seq.forEach(x=>r.push({o:x,p:'src'}))});return r}
+
+/* ===== YouTube ===== */
 let ytResolve;const ytApi=new Promise(r=>ytResolve=r);
 window.onYouTubeIframeAPIReady=()=>ytResolve();
 (()=>{const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)})();
-function ytId(u){u=u.trim();const m=u.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/);return m?m[1]:(/^[\w-]{11}$/.test(u)?u:null)}
 
-/* ---------- プレーヤー（ファイル／YouTube共通） ---------- */
+/* ===== オーディオエンジン ===== */
+let ctx=null,masterIn=null,comp=null,masterAn=null;
+const chan=c=>cfg.mutes[c]?0:(cfg.faders[c]??100)/100;
+function routeLimiter(){if(!ctx)return;try{masterIn.disconnect()}catch(e){}masterIn.connect(cfg.limiter?comp:masterAn)}
+function ensureCtx(){
+  if(ctx){if(ctx.state!=='running')ctx.resume();return}
+  try{ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return}
+  masterIn=ctx.createGain();comp=ctx.createDynamicsCompressor();
+  comp.threshold.value=-3;comp.knee.value=0;comp.ratio.value=20;comp.attack.value=.002;comp.release.value=.15;
+  masterAn=ctx.createAnalyser();masterAn.fftSize=1024;comp.connect(masterAn);masterAn.connect(ctx.destination);
+  routeLimiter();bgm.attach();fg.attach();applyAll();
+}
 function makePlayer(divId,loop){
-  const a=new Audio();a.loop=loop;let yt=null,ready=null,mode=null,endCb=null,vol=1;
-  a.onended=()=>endCb&&endCb();
-  function ensure(){if(ready)return ready;ready=ytApi.then(()=>new Promise(r=>{
-    yt=new YT.Player(divId,{width:'1',height:'1',playerVars:{controls:0,playsinline:1,disablekb:1},
-      events:{onReady:()=>r(),onStateChange:e=>{if(e.data===0&&mode==='yt'){if(loop){yt.seekTo(0);yt.playVideo()}else endCb&&endCb()}},
-              onError:()=>{if(mode==='yt'&&!loop)endCb&&endCb()}}})}));return ready}
-  return{
-    ensure,
-    async play(src,seek=0){
-      mode=src.type;
-      if(mode==='yt'){a.pause();await ensure();yt.setVolume(Math.round(vol*100));yt.loadVideoById({videoId:src.id,startSeconds:seek>2?seek:0})}
-      else{try{yt&&yt.pauseVideo()}catch(e){}a.src=src.url;a.volume=vol;
-        await new Promise(r=>{if(a.readyState>=1)r();else a.onloadedmetadata=()=>r()});
-        if(seek>2)a.currentTime=Math.min(seek,a.duration-1);a.play().catch(()=>{})}},
-    resume(){if(mode==='yt'){try{yt.playVideo()}catch(e){}}else a.play().catch(()=>{})},
-    pause(){a.pause();try{yt&&yt.pauseVideo()}catch(e){}},
-    setVol(v){vol=Math.max(0,Math.min(1,v));a.volume=vol;try{yt&&yt.setVolume(Math.round(vol*100))}catch(e){}},
-    get vol(){return vol},
-    get playing(){return mode==='yt'?!!(yt&&yt.getPlayerState&&yt.getPlayerState()===1):!a.paused},
+  const a=new Audio();a.loop=loop;a.preload='auto';
+  let gain=null,an=null,yt=null,ready=null,mode=null,endCb=null,fv=1,src=null;
+  a.addEventListener('ended',()=>{if(!loop&&mode==='file')endCb&&endCb()});
+  const P={cat:loop?'bgm':'show',
+    ensureYT(){if(ready)return ready;ready=ytApi.then(()=>new Promise(r=>{yt=new YT.Player(divId,{width:'1',height:'1',
+      playerVars:{controls:0,playsinline:1,disablekb:1},
+      events:{onReady:()=>{P.apply();r()},
+        onStateChange:e=>{if(mode!=='yt')return;if(e.data===0){if(loop){yt.seekTo(0);yt.playVideo()}else endCb&&endCb()}},
+        onError:()=>{if(mode==='yt'&&!loop)endCb&&endCb()}}})}));return ready},
+    attach(){if(gain||!ctx)return;const s=ctx.createMediaElementSource(a);gain=ctx.createGain();an=ctx.createAnalyser();an.fftSize=1024;
+      s.connect(gain);gain.connect(an);an.connect(masterIn);a.volume=1;P.apply()},
+    get an(){return an},get mode(){return mode},get src(){return src},
+    apply(){const v=fv*chan(P.cat),capped=Math.min(1,v*chan('master'));
+      if(gain)gain.gain.value=v;else a.volume=capped;
+      try{yt&&yt.setVolume&&yt.setVolume(Math.round(capped*100))}catch(e){}},
+    setFade(v){fv=Math.max(0,v);P.apply()},get fade(){return fv},
+    async play(s,seek=0){src=s;mode=s.type;
+      if(mode==='yt'){a.pause();await P.ensureYT();if(src!==s)return;P.apply();yt.loadVideoById({videoId:s.id,startSeconds:seek>2?seek:0})}
+      else{try{yt&&yt.pauseVideo&&yt.pauseVideo()}catch(e){}const url=blobs[s.key].url;if(a.src!==url)a.src=url;
+        await new Promise(r=>{if(a.readyState>=1)r();else a.addEventListener('loadedmetadata',()=>r(),{once:true})});
+        if(src!==s)return;a.currentTime=seek>2?Math.min(seek,a.duration-1):0;a.play().catch(()=>{})}},
+    resume(){if(mode==='yt'){try{yt.playVideo()}catch(e){}}else if(mode==='file')a.play().catch(()=>{})},
+    pause(){a.pause();try{yt&&yt.pauseVideo&&yt.pauseVideo()}catch(e){}},
+    stop(){P.pause();mode=null;src=null},
+    get playing(){if(mode==='yt'){try{return yt.getPlayerState()===1}catch(e){return false}}return mode==='file'&&!a.paused},
+    time(){try{return mode==='yt'?yt.getCurrentTime():a.currentTime}catch(e){return 0}},
     duration(){try{return mode==='yt'?yt.getDuration():a.duration}catch(e){return 0}},
     set onend(f){endCb=f}};
+  return P;
 }
 const bgm=makePlayer('yt_bgm',true),fg=makePlayer('yt_fg',false);
-bgm.ensure();fg.ensure();
-
-/* ---------- 保存 ---------- */
-let db=null;
-function openDB(){return new Promise(r=>{try{const q=indexedDB.open('believe-home',1);
- q.onupgradeneeded=()=>q.result.createObjectStore('files');q.onsuccess=()=>{db=q.result;r()};q.onerror=()=>r()}catch(e){r()}})}
-function dbPut(id,v){try{db&&db.transaction('files','readwrite').objectStore('files').put(v,id)}catch(e){}}
-function dbDel(id){try{db&&db.transaction('files','readwrite').objectStore('files').delete(id)}catch(e){}}
-function dbAll(){return new Promise(r=>{if(!db)return r({});try{const out={},c=db.transaction('files').objectStore('files').openCursor();
- c.onsuccess=()=>{const k=c.result;if(k){out[k.key]=k.value;k.continue()}else r(out)};c.onerror=()=>r({})}catch(e){r({})}})}
-const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}};
-if(ls.get('showTime'))$('showTime').value=ls.get('showTime');
-if(ls.get('vol')){master=+ls.get('vol');$('vol').value=master}
-
-function setFile(id,blob,name,save){
-  if(srcs[id]&&srcs[id].type==='file')URL.revokeObjectURL(srcs[id].url);
-  srcs[id]={type:'file',url:URL.createObjectURL(blob),name};
-  const a=new Audio();a.preload='metadata';a.src=srcs[id].url;a.onloadedmetadata=()=>{dur[id]=a.duration;renderTimeline()};
-  if(save){dbPut(id,{blob,name});ls.set('yt_'+id,null)}
-  changed(id);
-}
-function setYT(id,url,save){
-  const vid=ytId(url);if(!vid)return false;
-  if(srcs[id]&&srcs[id].type==='file')URL.revokeObjectURL(srcs[id].url);
-  srcs[id]={type:'yt',id:vid,name:url};delete dur[id];
-  if(save){ls.set('yt_'+id,url);dbDel(id)}
-  changed(id);return true;
-}
-function changed(id){renderSlots();renderTimeline();if(id==='bgm'&&running&&phase==='bgm')bgmOn()}
-
-/* ---------- 時刻 ---------- */
-function showAt(day){const [h,m]=$('showTime').value.split(':').map(Number);const d=new Date(day);d.setHours(h||0,m||0,0,0);return d}
-function nextShow(){const n=now();let d=new Date(n);d.setHours(0,0,0,0);
-  for(let i=0;i<60;i++){if(!CLOSED.has(key(d))){const s=showAt(d);if(s.getTime()+((dur.show||1800)+60)*1000>n.getTime())return s}d.setDate(d.getDate()+1)}
-  return showAt(d)}
-const hm=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-
-/* ---------- 再生制御 ---------- */
+bgm.ensureYT();fg.ensureYT();
+function applyAll(){if(masterIn)masterIn.gain.value=chan('master');bgm.apply();fg.apply()}
 const fades=new Map();
-function fade(p,to,ms,done){clearInterval(fades.get(p));const from=p.vol,st=Date.now();
-  const iv=setInterval(()=>{const k=Math.min(1,(Date.now()-st)/ms);p.setVol(from+(to-from)*k);if(k>=1){clearInterval(iv);done&&done()}},50);fades.set(p,iv)}
-let bgmCur=null;
-function bgmOn(){phase='bgm';fgId=null;paint();if(!srcs.bgm)return;
-  bgm.setVol(0);
-  if(bgmCur!==srcs.bgm){bgmCur=srcs.bgm;bgm.play(srcs.bgm)}else bgm.resume();
-  fade(bgm,master,2000)}
-function bgmOff(cb){fade(bgm,0,1500,()=>{bgm.pause();cb&&cb()})}
-function playFg(id,seek){
-  if(!srcs[id]){next(id);return}
-  fgId=id;phase=id[0]==='a'&&id!=='after'?'ann':id;paint();
-  const go=()=>{fg.setVol(master);fg.play(srcs[id],seek||0).then(()=>{setTimeout(()=>{const d=fg.duration();if(d>0){dur[id]=d;renderTimeline()}},3000)})};
-  if(phase==='ann'&&!$('duck').checked){fade(bgm,master*0.25,800);go()}else bgmOff(go);
+function fadeTo(p,to,dur,done){clearInterval(fades.get(p));const from=p.fade,st=Date.now();
+  if(dur<=0||Math.abs(from-to)<.001){p.setFade(to);done&&done();return}
+  const iv=setInterval(()=>{const k=Math.min(1,(Date.now()-st)/dur);p.setFade(from+(to-from)*k);if(k>=1){clearInterval(iv);fades.delete(p);done&&done()}},40);fades.set(p,iv)}
+
+/* ===== 進行 ===== */
+let running=false,ambient='bgm',cur=null,queue=[],fired=new Set(),offset=0,wake=null,bgmKey=null;
+const now=()=>new Date(Date.now()+offset);
+function bgmOn(){ambient='bgm';if(!usable(cfg.bgm)){bgm.stop();bgmKey=null;return}
+  const k=cfg.bgm.type+srcKey(cfg.bgm);bgm.setFade(0);if(bgmKey!==k){bgmKey=k;bgm.play(cfg.bgm)}else bgm.resume();fadeTo(bgm,1,2000)}
+function bgmOff(cb){if(bgm.fade<.01){bgm.pause();cb&&cb();return}fadeTo(bgm,0,1200,()=>{bgm.pause();cb&&cb()})}
+function playEntry(e,seek=0){
+  cur=e;fg.cat=e.kind==='pre'?'ann':'show';fg.apply();
+  const go=()=>{if(cur!==e)return;fg.setFade(1);fg.play(e.src,seek).then(()=>setTimeout(()=>{if(cur===e)setDur(e.src,fg.duration())},3000))};
+  if(e.kind==='pre'&&!cfg.duck&&ambient==='bgm'){fadeTo(bgm,.25,800);go()}else bgmOff(go);
 }
-function next(id){if(id==='show')return playFg('song');if(id==='song')return playFg('after');bgmOn()}
-fg.onend=()=>{const id=fgId;fgId=null;if(id)next(id)};
+function advance(){const prev=cur;cur=null;
+  if(queue.length)return playEntry(queue.shift());
+  if(prev&&prev.kind==='seq'){if(prev.show.after==='stop'){ambient='silent';bgmOff()}else bgmOn();return}
+  if(ambient==='bgm'){if(!cfg.duck&&bgm.playing)fadeTo(bgm,1,1500);else bgmOn()}
+}
+fg.onend=()=>{if(cur)advance()};
+function startSeq(show,seek=0,from=0){
+  fg.stop();cur=null;
+  queue=show.seq.slice(from).map((it,i)=>({show,kind:'seq',idx:i+from,label:it.label,src:it.src})).filter(e=>usable(e.src));
+  if(!queue.length){if(show.after==='stop'){ambient='silent';bgmOff()}return}
+  playEntry(queue.shift(),seek);
+}
+function playPre(show,i){const p=show.pre[i];if(!p||!usable(p.src))return;fg.stop();queue=[];playEntry({show,kind:'pre',idx:i,label:p.label,src:p.src})}
+
+function estDur(sh){let t=0;sh.seq.forEach((it,i)=>{t+=durOf(it.src)||(i===0?1800:0)});return t||60}
+function firstWin(sh){const f=sh.seq.find(x=>usable(x.src));return (f&&durOf(f.src))||1800}
+function nextOcc(sh,n){const closed=parseClosed(sh.closed);const [h,m]=(sh.time||'00:00').split(':').map(Number);
+  const d=new Date(n);d.setHours(0,0,0,0);
+  for(let i=0;i<400;i++){if(!closed.has(key(d))){const T=new Date(d);T.setHours(h||0,m||0,0,0);if(T.getTime()+(estDur(sh)+60)*1000>n.getTime())return T}d.setDate(d.getDate()+1)}
+  return null}
+function markPast(){const n=now();for(const sh of cfg.shows){const T=nextOcc(sh,n);if(!T)continue;const diff=(T-n)/1000,dk=sh.id+key(T);
+  sh.pre.forEach((p,i)=>{if(diff<(+p.min||0)*60-20)fired.add(dk+'P'+i)})}}
 
 function tick(){
-  const s=nextShow(),n=now(),diff=(s-n)/1000,dk=key(s),r=Math.max(0,diff);
-  const live=['show','song','after'].includes(phase);
-  $('count').textContent=live?'公演中':[Math.floor(r/3600),Math.floor(r%3600/60),Math.floor(r%60)].map(x=>String(x).padStart(2,'0')).join(':');
-  $('countLabel').textContent=`次の公演まで（${s.getMonth()+1}/${s.getDate()} ${hm(s)}）`;
-  if(running&&(phase==='bgm'||phase==='ann')){
-    if(diff<=0&&!fired.has(dk+'show')){fired.add(dk+'show');fgId=null;fg.pause();playFg('show',-diff)}
-    else if(phase==='bgm'){for(const sl of SLOTS){if(!sl.off)continue;const k=dk+sl.id;
-      if(!fired.has(k)&&diff<=sl.off&&diff>sl.off-20){fired.add(k);playFg(sl.id);break}}}
+  const n=now();
+  if(running){
+    const busy=cur&&cur.kind==='seq';
+    for(const sh of cfg.shows){if(!sh.on)continue;const T=nextOcc(sh,n);if(!T)continue;
+      const diff=(T-n)/1000,dk=sh.id+key(T);
+      if(diff<=0&&!fired.has(dk+'S')){if(busy)continue;fired.add(dk+'S');if(-diff<firstWin(sh)){startSeq(sh,-diff);break}continue}
+      if(busy)continue;
+      let hit=-1;sh.pre.forEach((p,i)=>{if(hit>=0)return;const o=(+p.min||0)*60;if(!fired.has(dk+'P'+i)&&diff<=o&&diff>o-20){fired.add(dk+'P'+i);hit=i}});
+      if(hit>=0){playPre(sh,hit);break}
+    }
   }
-  renderTimeline();
+  renderStatus(n);renderCues(n);
 }
 
-/* ---------- 表示 ---------- */
-function paint(){
-  const map={idle:'停止中',bgm:'ハーバーBGM',ann:'アナウンス',show:'本編',song:'エンディング',after:'終了アナウンス'};
-  $('phase').textContent=map[phase];$('phase').className='pill'+(phase==='idle'?' off':'');
-  const cur=fgId?NAME[fgId]:(srcs.bgm?NAME.bgm:'BGM未設定（無音で待機中）');
-  $('track').textContent=phase==='idle'?'「開始」を押すと時刻に合わせて自動で流れます':'再生中：'+cur;
-  $('startBtn').textContent=running?'停止':'開始';
-}
-let lastTL='';
-function renderTimeline(){
-  const s=nextShow(),n=now(),t=x=>new Date(s.getTime()+x*1000),sd=dur.show||1800,sg=dur.song||0;
-  const rows=[['a60',t(-3600),'1時間前アナウンス'],['a30',t(-1800),'30分前アナウンス'],['a15',t(-900),'15分前アナウンス'],['a5',t(-300),'5分前アナウンス'],
-    ['show',t(0),'ビリーヴ!本編'+(dur.show?`（${Math.round(sd/60)}分）`:'')],['song',t(sd),'君の願いが世界を輝かす'],
-    ['after',t(sd+sg),'終了後アナウンス'],['bgm',t(sd+sg+(dur.after||0)),'ハーバーBGMに戻る']];
-  const html=rows.map(([id,d,l])=>{const c=id===fgId?'active':(d<n?'done':'');
-    return `<li class="${c}"><span class="t">${hm(d)}</span><span>${l}${!srcs[id]&&id!=='bgm'?' <span style="color:var(--warn);font-size:.8rem">音源なし</span>':''}</span></li>`}).join('');
-  if(html!==lastTL){$('timeline').innerHTML=html;lastTL=html}
-}
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function renderSlots(){
-  $('slots').innerHTML=SLOTS.map(s=>{const v=srcs[s.id];
-    const label=v?(v.type==='yt'?'<span class="tag">YouTube</span> '+esc(v.name):'<span class="tag">ファイル</span> '+esc(v.name)):'未設定';
-    return `<div class="slot ${v?'':'missing'}">
-    <span class="name">${s.name}</span>
-    <span class="file">${label}${s.hint?'・'+s.hint:''}</span>
-    <span class="acts">${v&&v.type==='file'?`<button class="small" data-try="${s.id}">試聴</button>`:''}${v&&v.type==='yt'?`<a class="small" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener" style="color:var(--sea);font-size:.82rem;padding:5px 4px">確認</a>`:''}
-      <button class="small" data-pick="${s.id}">ファイル</button><input type="file" accept="audio/*,video/mp4" id="f_${s.id}" data-id="${s.id}"></span>
-    <div class="yt"><input id="u_${s.id}" placeholder="YouTubeのURLを貼る" value="${v&&v.type==='yt'?esc(v.name):''}"><button class="small" data-yt="${s.id}">設定</button></div></div>`}).join('');
-}
-const slotsEl=$('slots');
-slotsEl.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)setFile(e.target.dataset.id,f,f.name,true)});
-let trial=null;
-slotsEl.addEventListener('click',e=>{const d=e.target.dataset||{};
-  if(d.pick)$('f_'+d.pick).click();
-  if(d.yt){const inp=$('u_'+d.yt);if(!setYT(d.yt,inp.value,true)){inp.style.borderColor='var(--warn)';inp.value='';inp.placeholder='URLを読み取れませんでした。動画のURLを貼ってください'}}
-  if(d.try){if(trial){trial.pause();const same=trial._id===d.try;trial=null;if(same)return}
-    trial=new Audio(srcs[d.try].url);trial._id=d.try;trial.volume=master;trial.play().catch(()=>{});
-    setTimeout(()=>{if(trial&&trial._id===d.try){trial.pause();trial=null}},15000)}});
-
-/* ---------- 操作 ---------- */
 async function start(){
-  running=true;fired=new Set();
-  const s=nextShow(),diff=(s-now())/1000,dk=key(s);
-  for(const sl of SLOTS)if(sl.off&&diff<sl.off-20)fired.add(dk+sl.id);
+  ensureCtx();running=true;fired=new Set();markPast();ambient='bgm';
   try{wake=await navigator.wakeLock.request('screen')}catch(e){}
-  if(diff<=0){fired.add(dk+'show');playFg('show',-diff)}else bgmOn();
-  tick();
+  const n=now();let started=false;
+  for(const sh of cfg.shows){if(!sh.on)continue;const T=nextOcc(sh,n);if(!T)continue;const diff=(T-n)/1000;
+    if(diff<=0){fired.add(sh.id+key(T)+'S');if(!started&&-diff<firstWin(sh)){started=true;startSeq(sh,-diff)}}}
+  if(!started)bgmOn();tick();
 }
-function stop(){running=false;phase='idle';fgId=null;fg.pause();bgmOff();try{wake&&wake.release()}catch(e){}wake=null;paint()}
-$('startBtn').onclick=()=>running?stop():start();
-$('testBtn').onclick=()=>{offset=0;offset=nextShow().getTime()-305000-Date.now();$('resetTestBtn').hidden=false;stop();start()};
-$('resetTestBtn').onclick=()=>{offset=0;$('resetTestBtn').hidden=true;stop()};
-$('showTime').onchange=()=>{ls.set('showTime',$('showTime').value);fired=new Set();
-  const s=nextShow(),diff=(s-now())/1000;for(const sl of SLOTS)if(sl.off&&diff<sl.off-20)fired.add(key(s)+sl.id);tick()};
-$('vol').oninput=e=>{master=+e.target.value;ls.set('vol',master);
-  if(phase==='bgm')bgm.setVol(master);if(phase==='ann'&&!$('duck').checked)bgm.setVol(master*.25);if(fgId)fg.setVol(master)};
+function stop(){running=false;queue=[];cur=null;fg.stop();bgmOff();ambient='bgm';try{wake&&wake.release()}catch(e){}wake=null;tick()}
+function panic(){running=false;queue=[];cur=null;fades.forEach(clearInterval);fades.clear();fg.stop();bgm.pause();bgm.setFade(0);tick()}
+$('runBtn').onclick=()=>running?stop():start();
+$('panicBtn').onclick=panic;
+$('testOff').onclick=()=>{offset=0;$('testBadge').hidden=true;stop()};
+document.addEventListener('pointerdown',()=>ensureCtx(),{once:true});
 document.addEventListener('visibilitychange',async()=>{if(running&&document.visibilityState==='visible'&&!wake){try{wake=await navigator.wakeLock.request('screen')}catch(e){}}});
 
-for(const s of SLOTS){const u=ls.get('yt_'+s.id);if(u)setYT(s.id,u,false)}
-renderSlots();renderTimeline();paint();
-openDB().then(dbAll).then(all=>{for(const [id,v] of Object.entries(all))if(v&&v.blob&&!srcs[id])setFile(id,v.blob,v.name,false)});
-setInterval(tick,500);tick();
+/* ===== 表示：ステータス ===== */
+function renderStatus(n){
+  $('clock').textContent=pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds());
+  $('lamp').classList.toggle('on',running&&(!!cur||bgm.playing));
+  $('runBtn').textContent=running?'停止':'開始';$('runBtn').classList.toggle('on',running);
+  let l1,l2,t=0,d=0;
+  if(cur){l1=cur.label;l2=cur.show.name+(cur.kind==='pre'?'・開始前アナウンス':'・本番');t=fg.time();d=fg.duration()||durOf(cur.src)}
+  else if(running&&ambient==='bgm'&&usable(cfg.bgm)){l1='ハーバーBGM';l2=cfg.bgm.name||'';t=bgm.time();d=bgm.duration()}
+  else if(running){l1=ambient==='silent'?'無音（BGM停止中）':'BGM未設定';l2='次のキューを待機中'}
+  else{l1='STOP';l2='「開始」で自動運行'}
+  $('lcd1').textContent=l1;$('lcd2').textContent=l2;
+  $('lcdT').textContent=d?ms(t)+' / '+ms(d):'--:-- / --:--';
+  $('lcdBar').style.width=d?Math.min(100,t/d*100)+'%':'0';
+  const nx=cueCache.find(c=>c.t>n&&c.kind!=='end');
+  $('nextLabel').textContent=nx?`次のキュー：${nx.label}（${nx.show.name}）`:'次のキュー：—';
+  $('nextCount').textContent=nx?hms((nx.t-n)/1000):'--:--:--';
+}
+
+/* ===== 表示：キューシート ===== */
+let cueCache=[],lastCues='';
+function buildCues(n){const out=[];cfg.shows.forEach((sh,si)=>{if(!sh.on)return;const T=nextOcc(sh,n);if(!T)return;const c=COLORS[si%COLORS.length];
+  sh.pre.forEach((p,i)=>out.push({t:new Date(T-(+p.min||0)*60000),show:sh,c,kind:'pre',idx:i,label:p.label,src:p.src}));
+  let acc=0;sh.seq.forEach((it,i)=>{out.push({t:new Date(T.getTime()+acc*1000),show:sh,c,kind:'seq',idx:i,label:it.label,src:it.src});acc+=durOf(it.src)||(i===0?1800:0)});
+  if(sh.seq.length)out.push({t:new Date(T.getTime()+acc*1000),show:sh,c,kind:'end',label:sh.after==='stop'?'BGMを止める':'ハーバーBGMに戻る'})});
+  return out.sort((a,b)=>a.t-b.t)}
+function renderCues(n,force){
+  cueCache=buildCues(n);const today=key(n);let nextMarked=false;
+  const html=cueCache.map(c=>{
+    const act=cur&&cur.show===c.show&&cur.kind===c.kind&&cur.idx===c.idx;
+    let cls='',st='<span class="chip">待機</span>';
+    if(act){cls='active';st='<span class="chip" style="color:var(--amber);border-color:var(--amber)">送出中</span>'}
+    else if(c.t<=n){cls='done';st='<span class="chip">済</span>'}
+    else if(!nextMarked&&c.kind!=='end'){nextMarked=true;cls='next';st='<span class="chip">NEXT</span>'}
+    const dt=key(c.t)===today?'':(c.t.getMonth()+1)+'/'+c.t.getDate()+' ';
+    const kind=c.kind==='pre'?`${c.show.pre[c.idx].min}分前`:c.kind==='seq'?'本番':'終了後';
+    const miss=c.kind!=='end'&&!usable(c.src)?' <span class="warn">音源なし（飛ばします）</span>':'';
+    return `<tr class="${cls}"><td class="tm">${dt}${hm(c.t)}</td><td><span class="dot" style="background:${c.c}"></span>${esc(c.show.name)}</td><td><span class="chip">${kind}</span> ${esc(c.label)}${miss}</td><td class="st">${st}</td></tr>`}).join('')
+    ||'<tr><td colspan="4" style="color:var(--muted)">有効なショーがありません。下の「Shows」で追加してください。</td></tr>';
+  if(html!==lastCues||force){$('cues').innerHTML=html;lastCues=html}
+}
+
+/* ===== チャンネルストリップ ===== */
+const STRIPS=[{c:'bgm',n:'BGM',s:'ハーバー'},{c:'ann',n:'ANNOUNCE',s:'開始前アナウンス'},{c:'show',n:'SHOW',s:'本番・閉園など'},{c:'master',n:'MASTER',s:'全体'}];
+const MAX=200,marks=[200,150,100,50,0];
+$('console').innerHTML=STRIPS.map(s=>`<div class="strip ${s.c==='master'?'master':''}" data-c="${s.c}">
+  <div class="chname">${s.n}</div><div class="chsub">${s.s}</div>
+  ${s.c!=='master'?`<span class="ytled" id="yt_${s.c}">YouTube</span>`:'<span class="ytled" style="visibility:hidden">-</span>'}
+  <div class="mf"><div class="meter"><i id="m_${s.c}"></i><b id="p_${s.c}"></b></div>
+    <div class="scale">${marks.map(v=>`<span class="${v===100?'u':''}" style="bottom:calc(11px + ${v/MAX} * (100% - 22px))">${v===100?'0dB':v}</span>`).join('')}</div>
+    <div class="fader" id="f_${s.c}" role="slider" tabindex="0" aria-label="${s.n} 音量" aria-valuemin="0" aria-valuemax="${MAX}"><div class="cap"></div></div></div>
+  <div class="val" id="v_${s.c}"></div>
+  <div class="sbtns"><button class="key mute" id="mu_${s.c}">Mute</button>${s.c==='master'?'<button class="key lim" id="lim">Limit</button>':''}</div>
+</div>`).join('')+'<p class="consolenote">フェーダーは0〜200%（ダブルクリックで100%に戻る）。100%を超える増幅は音声ファイルだけに効き、YouTubeは100%が上限です。LIMITをオンにすると、上げすぎても音割れしにくくなります。</p>';
+function drawFader(c){const v=cfg.faders[c]??100,p=v/MAX,el=$('f_'+c);
+  el.querySelector('.cap').style.bottom=`calc(${p} * (100% - 22px))`;el.setAttribute('aria-valuenow',v);
+  const dbv=v===0?'-∞':(20*Math.log10(v/100)).toFixed(1);$('v_'+c).innerHTML=`${v}%<small>${v>100?'+':''}${dbv} dB</small>`;
+  $('mu_'+c).classList.toggle('on',!!cfg.mutes[c])}
+STRIPS.forEach(({c})=>{const el=$('f_'+c);
+  const set=v=>{cfg.faders[c]=Math.round(Math.max(0,Math.min(MAX,v)));drawFader(c);applyAll();save()};
+  const fromY=e=>{const r=el.getBoundingClientRect();return (1-(e.clientY-r.top-11)/(r.height-22))*MAX};
+  el.addEventListener('pointerdown',e=>{ensureCtx();el.setPointerCapture(e.pointerId);set(fromY(e))});
+  el.addEventListener('pointermove',e=>{if(el.hasPointerCapture(e.pointerId))set(fromY(e))});
+  el.addEventListener('dblclick',()=>set(100));
+  el.addEventListener('keydown',e=>{const v=cfg.faders[c]??100,st=e.shiftKey?10:2;
+    if(e.key==='ArrowUp'||e.key==='ArrowRight'){set(v+st);e.preventDefault()}else if(e.key==='ArrowDown'||e.key==='ArrowLeft'){set(v-st);e.preventDefault()}
+    else if(e.key==='Home'){set(0);e.preventDefault()}else if(e.key==='End'){set(MAX);e.preventDefault()}});
+  $('mu_'+c).onclick=()=>{cfg.mutes[c]=!cfg.mutes[c];drawFader(c);applyAll();save()};
+  drawFader(c)});
+const limBtn=$('lim');const drawLim=()=>limBtn.classList.toggle('on',!!cfg.limiter);drawLim();
+limBtn.onclick=()=>{cfg.limiter=!cfg.limiter;drawLim();routeLimiter();save()};
+
+/* メーター */
+const buf=new Float32Array(1024),peaks={bgm:0,ann:0,show:0,master:0};
+function level(an){if(!an)return 0;an.getFloatTimeDomainData(buf);let s=0;for(let i=0;i<buf.length;i++)s+=buf[i]*buf[i];return Math.sqrt(s/buf.length)}
+function meters(){
+  const fl=cur?level(fg.an):0;
+  const L={bgm:level(bgm.an),ann:fg.cat==='ann'?fl:0,show:fg.cat==='show'?fl:0,master:masterAn?level(masterAn):0};
+  for(const c in L){const dbv=20*Math.log10(L[c]+1e-7);const p=Math.max(0,Math.min(1,(dbv+54)/54));
+    peaks[c]=Math.max(p,peaks[c]-.006);$('m_'+c).style.height=p*100+'%';$('p_'+c).style.bottom=`calc(${peaks[c]*100}% - 2px)`}
+  $('yt_bgm').classList.toggle('on',bgm.mode==='yt'&&bgm.playing);
+  $('yt_ann').classList.toggle('on',!!cur&&fg.cat==='ann'&&fg.mode==='yt');
+  $('yt_show').classList.toggle('on',!!cur&&fg.cat==='show'&&fg.mode==='yt');
+  requestAnimationFrame(meters)}
+requestAnimationFrame(meters);
+
+/* ===== 編集 ===== */
+function srcWidget(path,s){
+  const lab=!s?'<span class="nm none">未設定</span>':s.type==='yt'?`<span class="nm"><span class="tag yt">YouTube</span>${esc(s.name)}</span>`
+    :usable(s)?`<span class="nm"><span class="tag fl">FILE</span>${esc(s.name||blobs[s.key].name)}</span>`:'<span class="nm none">未設定</span>';
+  return `<div class="src" data-path="${path}">${lab}<button data-act="file">ファイル</button><input placeholder="YouTubeのURL" value="${s&&s.type==='yt'?esc(s.name):''}" aria-label="YouTubeのURL"><button data-act="yt">設定</button>${s?'<button data-act="clr" title="音源を外す">×</button>':''}</div>`}
+function ref(path){if(path==='bgm')return{o:cfg,p:'bgm'};const [,sid,list,i]=path.split('|');const sh=cfg.shows.find(x=>x.id===sid);return sh?{o:sh[list][+i],p:'src'}:null}
+function renderBgm(){$('bgmSrc').innerHTML=srcWidget('bgm',cfg.bgm);$('duck').checked=!!cfg.duck}
+function renderShows(){
+  $('shows').innerHTML=cfg.shows.map((sh,si)=>`<div class="show ${sh.on?'':'off'}" data-sid="${sh.id}" style="--c:${COLORS[si%COLORS.length]}">
+    <div class="showhead">
+      <input class="nm" data-f="name" value="${esc(sh.name)}" aria-label="ショー名">
+      <input type="time" data-f="time" value="${esc(sh.time)}" aria-label="開始時刻">
+      <label class="cap-label" style="display:flex;gap:4px;align-items:center"><input type="checkbox" data-f="on" ${sh.on?'checked':''}> 有効</label>
+      <button class="key" data-act="go" title="今すぐ本番を送出">GO</button>
+      <button data-act="test" title="5分前の状態から試す">テスト</button>
+      <button data-act="del" title="このショーを削除">削除</button>
+    </div>
+    <div class="showbody">
+      <div class="rowl"><label>終了後 <select data-f="after"><option value="bgm" ${sh.after!=='stop'?'selected':''}>BGMに戻る</option><option value="stop" ${sh.after==='stop'?'selected':''}>BGMを止める</option></select></label>
+        <label style="flex:1 1 260px">休止日 <input data-f="closed" value="${esc(sh.closed)}" placeholder="例 2026-11-27, 2027-01-06~2027-02-04" style="flex:1"></label></div>
+      <div class="cap-label">開始前アナウンス</div>
+      <div class="items">${sh.pre.map((p,i)=>`<div class="item">
+        <span class="n"><input type="number" min="0" max="600" data-f="pmin" data-i="${i}" value="${+p.min||0}" aria-label="何分前">分前</span>
+        <input data-f="plabel" data-i="${i}" value="${esc(p.label)}" aria-label="名前">
+        ${srcWidget(`s|${sh.id}|pre|${i}`,p.src)}
+        <span class="acts"><button data-act="firepre" data-i="${i}" title="今すぐ送出">▶</button><button data-act="delpre" data-i="${i}" title="削除">×</button></span></div>`).join('')||'<span class="hint">なし</span>'}</div>
+      <button class="add" data-act="addpre">＋ アナウンスを追加</button>
+      <div class="cap-label">本番（上から順に再生）</div>
+      <div class="items">${sh.seq.map((p,i)=>`<div class="item">
+        <span class="n">#${i+1}</span>
+        <input data-f="slabel" data-i="${i}" value="${esc(p.label)}" aria-label="名前">
+        ${srcWidget(`s|${sh.id}|seq|${i}`,p.src)}
+        <span class="acts"><button data-act="fireseq" data-i="${i}" title="ここから送出">▶</button><button data-act="up" data-i="${i}" title="上へ" ${i?'':'disabled'}>↑</button><button data-act="delseq" data-i="${i}" title="削除">×</button></span></div>`).join('')||'<span class="hint">なし</span>'}</div>
+      <button class="add" data-act="addseq">＋ 本番の曲・アナウンスを追加</button>
+    </div></div>`).join('');
+}
+function changed(structural){save();closedCache.clear();if(running)markPast();if(structural)renderShows();renderCues(now(),true)}
+let pickPath=null;
+$('picker').onchange=e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f||!pickPath)return;const r=ref(pickPath);if(!r)return;
+  const k=uid();addBlob(k,f,f.name);dbPut(k,{blob:f,name:f.name});r.o[r.p]={type:'file',key:k,name:f.name};
+  if(pickPath==='bgm'){renderBgm();save();if(running&&ambient==='bgm'&&!cur)bgmOn()}else changed(true)};
+function srcClick(e){const b=e.target.closest('button[data-act]');const w=e.target.closest('.src');if(!b||!w)return false;const path=w.dataset.path,r=ref(path);if(!r)return true;
+  const act=b.dataset.act;
+  if(act==='file'){pickPath=path;$('picker').click();return true}
+  if(act==='yt'){const inp=w.querySelector('input'),id=ytId(inp.value);if(!id){inp.value='';inp.placeholder='URLを読み取れませんでした';inp.style.borderColor='var(--red)';return true}
+    r.o[r.p]={type:'yt',id,name:inp.value.trim()}}
+  if(act==='clr')r.o[r.p]=null;
+  if(path==='bgm'){renderBgm();save();if(running&&ambient==='bgm'&&!cur){bgmKey=null;usable(cfg.bgm)?bgmOn():bgmOff()}}else changed(true);
+  return true}
+$('bgmSrc').onclick=srcClick;
+$('duck').onchange=e=>{cfg.duck=e.target.checked;save()};
+$('shows').addEventListener('click',e=>{if(srcClick(e))return;const b=e.target.closest('button[data-act]');if(!b)return;
+  const sh=cfg.shows.find(x=>x.id===b.closest('.show').dataset.sid);if(!sh)return;const i=+b.dataset.i,act=b.dataset.act;
+  if(act==='go'){ensureCtx();if(!running){running=true;markPast()}const T=nextOcc(sh,now());if(T)fired.add(sh.id+key(T)+'S');startSeq(sh,0);return}
+  if(act==='fireseq'){ensureCtx();if(!running){running=true;markPast()}startSeq(sh,0,i);return}
+  if(act==='firepre'){ensureCtx();if(!running){running=true;markPast()}playPre(sh,i);return}
+  if(act==='test'){offset=0;const T=nextOcc(sh,new Date());if(!T)return;offset=T.getTime()-305000-Date.now();$('testBadge').hidden=false;stop();start();return}
+  if(act==='del'){if(!confirm(`「${sh.name}」を削除しますか？`))return;cfg.shows=cfg.shows.filter(x=>x!==sh)}
+  if(act==='addpre')sh.pre.push({min:5,label:'アナウンス',src:null});
+  if(act==='addseq')sh.seq.push({label:sh.seq.length?'次の曲':'本編',src:null});
+  if(act==='delpre')sh.pre.splice(i,1);
+  if(act==='delseq')sh.seq.splice(i,1);
+  if(act==='up'&&i>0){const t=sh.seq[i-1];sh.seq[i-1]=sh.seq[i];sh.seq[i]=t}
+  changed(true)});
+$('shows').addEventListener('change',e=>{const f=e.target.dataset.f;if(!f)return;const sh=cfg.shows.find(x=>x.id===e.target.closest('.show').dataset.sid);if(!sh)return;
+  const i=+e.target.dataset.i,v=e.target.type==='checkbox'?e.target.checked:e.target.value;
+  if(f==='pmin')sh.pre[i].min=Math.max(0,+v||0);else if(f==='plabel')sh.pre[i].label=v;else if(f==='slabel')sh.seq[i].label=v;else sh[f]=v;
+  changed(f==='on')});
+$('addShow').onclick=()=>{cfg.shows.push({id:uid(),name:'新しいショー',time:'20:00',on:true,after:'bgm',closed:'',
+  pre:[{min:5,label:'5分前アナウンス',src:null}],seq:[{label:'本編',src:null}]});changed(true)};
+
+/* ===== 起動 ===== */
+renderBgm();renderShows();tick();
+openDB().then(dbAll).then(all=>{
+  for(const [k,v] of Object.entries(all))if(v&&v.blob)addBlob(k,v.blob,v.name);
+  for(const r of allRefs()){const s=r.o[r.p];if(s&&s.type==='file'){if(blobs[s.key]){s.name=s.name||blobs[s.key].name;delete s.legacy}else if(s.legacy)r.o[r.p]=null}}
+  save();renderBgm();renderShows();renderCues(now(),true)});
+setInterval(tick,500);
 </script>
-</body></html>
+</body>
+</html>
