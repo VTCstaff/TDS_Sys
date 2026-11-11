@@ -1,0 +1,293 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="strict-origin-when-cross-origin">
+<title>おうちハーバーショー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: 夜のメディテレーニアンハーバー。上にカウントダウンの「灯り」、下に進行表とファイル棚の一列構成 */
+:root{
+  --night:#0c1424; --deep:#121d33; --panel:#17243e; --line:#2a3a5c;
+  --text:#ecebe4; --muted:#9aa6bf; --gold:#e8b85c; --gold-soft:rgba(232,184,92,.14);
+  --sea:#4fb0c6; --warn:#e07a5f;
+  --display:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--night);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.7;
+  background-image:radial-gradient(ellipse 120% 60% at 50% -10%,#1d2c4d 0%,transparent 60%);
+  min-height:100%}
+.wrap{max-width:760px;margin:0 auto;padding-block:28px 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:28px}
+h1{font-family:var(--display);font-weight:700;font-size:1.6rem;margin:0;letter-spacing:.04em;text-wrap:balance}
+.sub{color:var(--muted);margin:2px 0 0;font-size:.88rem}
+.hero{display:flex;flex-direction:column;gap:14px;padding:28px 22px;border:1px solid var(--line);border-radius:14px;
+  background:linear-gradient(180deg,var(--deep),var(--night))}
+.label{font-size:.75rem;letter-spacing:.14em;color:var(--muted)}
+.count{font-family:var(--display);font-size:clamp(2.6rem,11vw,4.4rem);font-weight:700;line-height:1;
+  font-variant-numeric:tabular-nums;color:var(--gold);letter-spacing:.02em}
+.now{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:4px 12px;border-radius:999px;background:var(--gold-soft);
+  color:var(--gold);font-weight:700;font-size:.85rem}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.pill.off{background:rgba(154,166,191,.12);color:var(--muted)}
+.pill.closed{background:rgba(224,122,95,.14);color:var(--warn)}
+.track{font-size:.9rem;color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);
+  padding:9px 16px}
+button:hover{border-color:var(--muted)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button.primary{background:var(--gold);color:#1a1405;border-color:var(--gold);font-weight:700;padding:11px 22px}
+button.small{padding:5px 11px;font-size:.82rem}
+section{display:flex;flex-direction:column;gap:12px}
+h2{font-family:var(--display);font-size:1.15rem;margin:0}
+.row{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center}
+.row label{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.9rem}
+input[type=time]{font:inherit;font-size:1.1rem;font-variant-numeric:tabular-nums;background:var(--panel);color:var(--text);
+  border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+input[type=range]{accent-color:var(--gold);width:140px}
+.timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.timeline li{display:grid;grid-template-columns:4.2em 1fr;gap:12px;padding:9px 12px;border-left:2px solid var(--line);
+  position:relative}
+.timeline li::before{content:"";position:absolute;left:-6px;top:16px;width:10px;height:10px;border-radius:50%;
+  background:var(--night);border:2px solid var(--line)}
+.timeline li.done{color:var(--muted)}
+.timeline li.done::before{background:var(--line)}
+.timeline li.active{background:var(--gold-soft);border-left-color:var(--gold);border-radius:0 8px 8px 0}
+.timeline li.active::before{border-color:var(--gold);background:var(--gold)}
+.t{font-variant-numeric:tabular-nums;font-weight:700;color:var(--sea)}
+.slots{display:flex;flex-direction:column;gap:8px}
+.slot{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:12px 14px;background:var(--panel);
+  border-radius:10px;border:1px solid transparent}
+.slot.missing{border-color:rgba(224,122,95,.4)}
+.slot .name{font-weight:700;min-width:0}
+.slot .file{grid-column:1;color:var(--muted);font-size:.82rem;min-width:0;overflow-wrap:anywhere}
+.slot .acts{grid-column:2;grid-row:1/3;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.slot input[type=file]{display:none}
+.yt{grid-column:1/-1;display:flex;gap:6px;min-width:0}
+.yt input{flex:1;min-width:0;font:inherit;font-size:.85rem;background:var(--night);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.tag{font-size:.7rem;padding:1px 7px;border-radius:6px;background:rgba(79,176,198,.15);color:var(--sea);margin-left:6px;font-weight:700}
+#ythost{position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden}
+.note{color:var(--muted);font-size:.85rem;margin:0;max-width:65ch}
+.note strong{color:var(--text)}
+@media (prefers-reduced-motion:no-preference){.pill::before{animation:blink 2s ease-in-out infinite}}
+@keyframes blink{50%{opacity:.35}}
+</style></head><body>
+<div class="wrap">
+  <header>
+    <h1>おうちハーバーショー</h1>
+    <p class="sub">ビリーヴ!〜シー・オブ・ドリームス〜の時刻に合わせて、家で同じ流れを再生します</p>
+  </header>
+  <div class="hero" aria-live="polite">
+    <span class="label" id="countLabel">次の公演まで</span>
+    <div class="count" id="count">--:--:--</div>
+    <div class="now">
+      <span class="pill off" id="phase">停止中</span>
+      <span class="track" id="track">「開始」を押すと時刻に合わせて自動で流れます</span>
+    </div>
+    <div class="controls">
+      <button class="primary" id="startBtn">開始</button>
+      <button id="testBtn">テスト：5分前から</button>
+      <button id="resetTestBtn" hidden>テスト終了</button>
+      <label class="row" style="gap:8px;color:var(--muted);font-size:.9rem">音量 <input type="range" id="vol" min="0" max="1" step="0.01" value="0.9"></label>
+    </div>
+  </div>
+  <section>
+    <h2>公演時刻</h2>
+    <div class="row">
+      <label for="showTime">本編スタート <input type="time" id="showTime" value="19:30"></label>
+      <label><input type="checkbox" id="duck" checked> アナウンス中はBGMを止める</label>
+    </div>
+    <p class="note">公演時刻は日によって変わるので、公式サイトのショースケジュールで確認して入力してください。公式発表の休止日（2026/11/27、2027/1/6〜2/4）は自動で翌公演日に送ります。</p>
+  </section>
+  <section>
+    <h2>今日の進行</h2>
+    <ol class="timeline" id="timeline"></ol>
+  </section>
+  <section>
+    <h2>音源</h2>
+    <p class="note">各枠に<strong>音声ファイル</strong>を選ぶか、<strong>YouTubeのURL</strong>を貼って「設定」を押してください。設定はこのブラウザに保存されます。YouTubeは投稿者が埋め込みを許可している動画だけ再生できます。</p>
+    <div class="slots" id="slots"></div>
+  </section>
+</div>
+<div id="ythost"><div id="yt_bgm"></div><div id="yt_fg"></div></div>
+<script>
+const SLOTS=[
+ {id:'bgm',name:'メディテレーニアンハーバーBGM',hint:'通常時ループ'},
+ {id:'a60',name:'1時間前アナウンス',off:3600},{id:'a30',name:'30分前アナウンス',off:1800},
+ {id:'a15',name:'15分前アナウンス',off:900},{id:'a5',name:'5分前アナウンス',off:300},
+ {id:'show',name:'ビリーヴ!本編'},{id:'song',name:'君の願いが世界を輝かす'},{id:'after',name:'終了後アナウンス'}];
+const NAME=Object.fromEntries(SLOTS.map(s=>[s.id,s.name]));
+const CLOSED=new Set(['2026-11-27']);
+for(let d=new Date(2027,0,6);d<=new Date(2027,1,4);d.setDate(d.getDate()+1))CLOSED.add(key(d));
+function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+const $=id=>document.getElementById(id);
+const srcs={},dur={};
+let running=false,phase='idle',fgId=null,fired=new Set(),offset=0,wake=null,master=0.9;
+const now=()=>new Date(Date.now()+offset);
+
+/* ---------- YouTube ---------- */
+let ytResolve;const ytApi=new Promise(r=>ytResolve=r);
+window.onYouTubeIframeAPIReady=()=>ytResolve();
+(()=>{const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)})();
+function ytId(u){u=u.trim();const m=u.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/);return m?m[1]:(/^[\w-]{11}$/.test(u)?u:null)}
+
+/* ---------- プレーヤー（ファイル／YouTube共通） ---------- */
+function makePlayer(divId,loop){
+  const a=new Audio();a.loop=loop;let yt=null,ready=null,mode=null,endCb=null,vol=1;
+  a.onended=()=>endCb&&endCb();
+  function ensure(){if(ready)return ready;ready=ytApi.then(()=>new Promise(r=>{
+    yt=new YT.Player(divId,{width:'1',height:'1',playerVars:{controls:0,playsinline:1,disablekb:1},
+      events:{onReady:()=>r(),onStateChange:e=>{if(e.data===0&&mode==='yt'){if(loop){yt.seekTo(0);yt.playVideo()}else endCb&&endCb()}},
+              onError:()=>{if(mode==='yt'&&!loop)endCb&&endCb()}}})}));return ready}
+  return{
+    ensure,
+    async play(src,seek=0){
+      mode=src.type;
+      if(mode==='yt'){a.pause();await ensure();yt.setVolume(Math.round(vol*100));yt.loadVideoById({videoId:src.id,startSeconds:seek>2?seek:0})}
+      else{try{yt&&yt.pauseVideo()}catch(e){}a.src=src.url;a.volume=vol;
+        await new Promise(r=>{if(a.readyState>=1)r();else a.onloadedmetadata=()=>r()});
+        if(seek>2)a.currentTime=Math.min(seek,a.duration-1);a.play().catch(()=>{})}},
+    resume(){if(mode==='yt'){try{yt.playVideo()}catch(e){}}else a.play().catch(()=>{})},
+    pause(){a.pause();try{yt&&yt.pauseVideo()}catch(e){}},
+    setVol(v){vol=Math.max(0,Math.min(1,v));a.volume=vol;try{yt&&yt.setVolume(Math.round(vol*100))}catch(e){}},
+    get vol(){return vol},
+    get playing(){return mode==='yt'?!!(yt&&yt.getPlayerState&&yt.getPlayerState()===1):!a.paused},
+    duration(){try{return mode==='yt'?yt.getDuration():a.duration}catch(e){return 0}},
+    set onend(f){endCb=f}};
+}
+const bgm=makePlayer('yt_bgm',true),fg=makePlayer('yt_fg',false);
+bgm.ensure();fg.ensure();
+
+/* ---------- 保存 ---------- */
+let db=null;
+function openDB(){return new Promise(r=>{try{const q=indexedDB.open('believe-home',1);
+ q.onupgradeneeded=()=>q.result.createObjectStore('files');q.onsuccess=()=>{db=q.result;r()};q.onerror=()=>r()}catch(e){r()}})}
+function dbPut(id,v){try{db&&db.transaction('files','readwrite').objectStore('files').put(v,id)}catch(e){}}
+function dbDel(id){try{db&&db.transaction('files','readwrite').objectStore('files').delete(id)}catch(e){}}
+function dbAll(){return new Promise(r=>{if(!db)return r({});try{const out={},c=db.transaction('files').objectStore('files').openCursor();
+ c.onsuccess=()=>{const k=c.result;if(k){out[k.key]=k.value;k.continue()}else r(out)};c.onerror=()=>r({})}catch(e){r({})}})}
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}};
+if(ls.get('showTime'))$('showTime').value=ls.get('showTime');
+if(ls.get('vol')){master=+ls.get('vol');$('vol').value=master}
+
+function setFile(id,blob,name,save){
+  if(srcs[id]&&srcs[id].type==='file')URL.revokeObjectURL(srcs[id].url);
+  srcs[id]={type:'file',url:URL.createObjectURL(blob),name};
+  const a=new Audio();a.preload='metadata';a.src=srcs[id].url;a.onloadedmetadata=()=>{dur[id]=a.duration;renderTimeline()};
+  if(save){dbPut(id,{blob,name});ls.set('yt_'+id,null)}
+  changed(id);
+}
+function setYT(id,url,save){
+  const vid=ytId(url);if(!vid)return false;
+  if(srcs[id]&&srcs[id].type==='file')URL.revokeObjectURL(srcs[id].url);
+  srcs[id]={type:'yt',id:vid,name:url};delete dur[id];
+  if(save){ls.set('yt_'+id,url);dbDel(id)}
+  changed(id);return true;
+}
+function changed(id){renderSlots();renderTimeline();if(id==='bgm'&&running&&phase==='bgm')bgmOn()}
+
+/* ---------- 時刻 ---------- */
+function showAt(day){const [h,m]=$('showTime').value.split(':').map(Number);const d=new Date(day);d.setHours(h||0,m||0,0,0);return d}
+function nextShow(){const n=now();let d=new Date(n);d.setHours(0,0,0,0);
+  for(let i=0;i<60;i++){if(!CLOSED.has(key(d))){const s=showAt(d);if(s.getTime()+((dur.show||1800)+60)*1000>n.getTime())return s}d.setDate(d.getDate()+1)}
+  return showAt(d)}
+const hm=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+
+/* ---------- 再生制御 ---------- */
+const fades=new Map();
+function fade(p,to,ms,done){clearInterval(fades.get(p));const from=p.vol,st=Date.now();
+  const iv=setInterval(()=>{const k=Math.min(1,(Date.now()-st)/ms);p.setVol(from+(to-from)*k);if(k>=1){clearInterval(iv);done&&done()}},50);fades.set(p,iv)}
+let bgmCur=null;
+function bgmOn(){phase='bgm';fgId=null;paint();if(!srcs.bgm)return;
+  bgm.setVol(0);
+  if(bgmCur!==srcs.bgm){bgmCur=srcs.bgm;bgm.play(srcs.bgm)}else bgm.resume();
+  fade(bgm,master,2000)}
+function bgmOff(cb){fade(bgm,0,1500,()=>{bgm.pause();cb&&cb()})}
+function playFg(id,seek){
+  if(!srcs[id]){next(id);return}
+  fgId=id;phase=id[0]==='a'&&id!=='after'?'ann':id;paint();
+  const go=()=>{fg.setVol(master);fg.play(srcs[id],seek||0).then(()=>{setTimeout(()=>{const d=fg.duration();if(d>0){dur[id]=d;renderTimeline()}},3000)})};
+  if(phase==='ann'&&!$('duck').checked){fade(bgm,master*0.25,800);go()}else bgmOff(go);
+}
+function next(id){if(id==='show')return playFg('song');if(id==='song')return playFg('after');bgmOn()}
+fg.onend=()=>{const id=fgId;fgId=null;if(id)next(id)};
+
+function tick(){
+  const s=nextShow(),n=now(),diff=(s-n)/1000,dk=key(s),r=Math.max(0,diff);
+  const live=['show','song','after'].includes(phase);
+  $('count').textContent=live?'公演中':[Math.floor(r/3600),Math.floor(r%3600/60),Math.floor(r%60)].map(x=>String(x).padStart(2,'0')).join(':');
+  $('countLabel').textContent=`次の公演まで（${s.getMonth()+1}/${s.getDate()} ${hm(s)}）`;
+  if(running&&(phase==='bgm'||phase==='ann')){
+    if(diff<=0&&!fired.has(dk+'show')){fired.add(dk+'show');fgId=null;fg.pause();playFg('show',-diff)}
+    else if(phase==='bgm'){for(const sl of SLOTS){if(!sl.off)continue;const k=dk+sl.id;
+      if(!fired.has(k)&&diff<=sl.off&&diff>sl.off-20){fired.add(k);playFg(sl.id);break}}}
+  }
+  renderTimeline();
+}
+
+/* ---------- 表示 ---------- */
+function paint(){
+  const map={idle:'停止中',bgm:'ハーバーBGM',ann:'アナウンス',show:'本編',song:'エンディング',after:'終了アナウンス'};
+  $('phase').textContent=map[phase];$('phase').className='pill'+(phase==='idle'?' off':'');
+  const cur=fgId?NAME[fgId]:(srcs.bgm?NAME.bgm:'BGM未設定（無音で待機中）');
+  $('track').textContent=phase==='idle'?'「開始」を押すと時刻に合わせて自動で流れます':'再生中：'+cur;
+  $('startBtn').textContent=running?'停止':'開始';
+}
+let lastTL='';
+function renderTimeline(){
+  const s=nextShow(),n=now(),t=x=>new Date(s.getTime()+x*1000),sd=dur.show||1800,sg=dur.song||0;
+  const rows=[['a60',t(-3600),'1時間前アナウンス'],['a30',t(-1800),'30分前アナウンス'],['a15',t(-900),'15分前アナウンス'],['a5',t(-300),'5分前アナウンス'],
+    ['show',t(0),'ビリーヴ!本編'+(dur.show?`（${Math.round(sd/60)}分）`:'')],['song',t(sd),'君の願いが世界を輝かす'],
+    ['after',t(sd+sg),'終了後アナウンス'],['bgm',t(sd+sg+(dur.after||0)),'ハーバーBGMに戻る']];
+  const html=rows.map(([id,d,l])=>{const c=id===fgId?'active':(d<n?'done':'');
+    return `<li class="${c}"><span class="t">${hm(d)}</span><span>${l}${!srcs[id]&&id!=='bgm'?' <span style="color:var(--warn);font-size:.8rem">音源なし</span>':''}</span></li>`}).join('');
+  if(html!==lastTL){$('timeline').innerHTML=html;lastTL=html}
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function renderSlots(){
+  $('slots').innerHTML=SLOTS.map(s=>{const v=srcs[s.id];
+    const label=v?(v.type==='yt'?'<span class="tag">YouTube</span> '+esc(v.name):'<span class="tag">ファイル</span> '+esc(v.name)):'未設定';
+    return `<div class="slot ${v?'':'missing'}">
+    <span class="name">${s.name}</span>
+    <span class="file">${label}${s.hint?'・'+s.hint:''}</span>
+    <span class="acts">${v&&v.type==='file'?`<button class="small" data-try="${s.id}">試聴</button>`:''}${v&&v.type==='yt'?`<a class="small" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener" style="color:var(--sea);font-size:.82rem;padding:5px 4px">確認</a>`:''}
+      <button class="small" data-pick="${s.id}">ファイル</button><input type="file" accept="audio/*,video/mp4" id="f_${s.id}" data-id="${s.id}"></span>
+    <div class="yt"><input id="u_${s.id}" placeholder="YouTubeのURLを貼る" value="${v&&v.type==='yt'?esc(v.name):''}"><button class="small" data-yt="${s.id}">設定</button></div></div>`}).join('');
+}
+const slotsEl=$('slots');
+slotsEl.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)setFile(e.target.dataset.id,f,f.name,true)});
+let trial=null;
+slotsEl.addEventListener('click',e=>{const d=e.target.dataset||{};
+  if(d.pick)$('f_'+d.pick).click();
+  if(d.yt){const inp=$('u_'+d.yt);if(!setYT(d.yt,inp.value,true)){inp.style.borderColor='var(--warn)';inp.value='';inp.placeholder='URLを読み取れませんでした。動画のURLを貼ってください'}}
+  if(d.try){if(trial){trial.pause();const same=trial._id===d.try;trial=null;if(same)return}
+    trial=new Audio(srcs[d.try].url);trial._id=d.try;trial.volume=master;trial.play().catch(()=>{});
+    setTimeout(()=>{if(trial&&trial._id===d.try){trial.pause();trial=null}},15000)}});
+
+/* ---------- 操作 ---------- */
+async function start(){
+  running=true;fired=new Set();
+  const s=nextShow(),diff=(s-now())/1000,dk=key(s);
+  for(const sl of SLOTS)if(sl.off&&diff<sl.off-20)fired.add(dk+sl.id);
+  try{wake=await navigator.wakeLock.request('screen')}catch(e){}
+  if(diff<=0){fired.add(dk+'show');playFg('show',-diff)}else bgmOn();
+  tick();
+}
+function stop(){running=false;phase='idle';fgId=null;fg.pause();bgmOff();try{wake&&wake.release()}catch(e){}wake=null;paint()}
+$('startBtn').onclick=()=>running?stop():start();
+$('testBtn').onclick=()=>{offset=0;offset=nextShow().getTime()-305000-Date.now();$('resetTestBtn').hidden=false;stop();start()};
+$('resetTestBtn').onclick=()=>{offset=0;$('resetTestBtn').hidden=true;stop()};
+$('showTime').onchange=()=>{ls.set('showTime',$('showTime').value);fired=new Set();
+  const s=nextShow(),diff=(s-now())/1000;for(const sl of SLOTS)if(sl.off&&diff<sl.off-20)fired.add(key(s)+sl.id);tick()};
+$('vol').oninput=e=>{master=+e.target.value;ls.set('vol',master);
+  if(phase==='bgm')bgm.setVol(master);if(phase==='ann'&&!$('duck').checked)bgm.setVol(master*.25);if(fgId)fg.setVol(master)};
+document.addEventListener('visibilitychange',async()=>{if(running&&document.visibilityState==='visible'&&!wake){try{wake=await navigator.wakeLock.request('screen')}catch(e){}}});
+
+for(const s of SLOTS){const u=ls.get('yt_'+s.id);if(u)setYT(s.id,u,false)}
+renderSlots();renderTimeline();paint();
+openDB().then(dbAll).then(all=>{for(const [id,v] of Object.entries(all))if(v&&v.blob&&!srcs[id])setFile(id,v.blob,v.name,false)});
+setInterval(tick,500);tick();
+</script>
+</body></html>
