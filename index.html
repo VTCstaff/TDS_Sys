@@ -11,7 +11,7 @@
 /* Layout: 上に送出状況（時計・LCD・トランスポート）、中央にチャンネルストリップ4本、下にキューシートとショー編集 */
 :root{
   --chassis:#15171b; --panel:#1e2127; --panel2:#262a32; --groove:#0b0c0f; --line:#343944;
-  --text:#e7e9ee; --muted:#8a92a3; --amber:#ffb341; --green:#4be08a; --red:#ff5a4e; --blue:#5ab8ff;
+  --text:#e7e9ee; --muted:#8a92a3; --amber:#ffb341; --green:#4be08a; --yellow:#ffe14a; --red:#ff5a4e; --blue:#5ab8ff;
   --lcd:#140f06;
   --label:"Barlow Condensed","Zen Kaku Gothic New",sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -68,13 +68,26 @@ input[type=time]{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .strip{display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--panel2);border:1px solid #000;border-radius:8px;padding:12px 8px;min-width:0}
 .strip.master{background:#2b2620}
 .chname{font-family:var(--label);font-weight:700;font-size:1.15rem;letter-spacing:.1em}
-.chsub{color:var(--muted);font-size:.75rem;margin-top:-10px;text-align:center}
 .mf{display:flex;gap:8px;align-items:stretch;height:230px}
-.meter{position:relative;width:12px;background:var(--groove);border:1px solid #000;border-radius:2px;overflow:hidden}
-.meter i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(to top,var(--green) 0 62%,var(--amber) 62% 85%,var(--red) 85%);
-  background-size:100% 230px;background-position:bottom}
-.meter::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(to top,transparent 0 4px,var(--groove) 4px 5px)}
-.meter b{position:absolute;left:0;right:0;height:2px;background:#fff;bottom:0;opacity:.8}
+.meter{position:relative;width:14px;border:1px solid #000;border-radius:2px;overflow:hidden;
+  background:linear-gradient(to top,#123222 0 75%,#3a2c0c 75% 94%,#3d1412 94%)}
+.meter i{position:absolute;left:0;right:0;bottom:0;height:0;
+  background:linear-gradient(to top,var(--green) 0 75%,var(--yellow) 75% 94%,var(--red) 94%);background-size:100% 100%}
+.meter i{--h:0;height:100%;clip-path:inset(calc(100% - var(--h)) 0 0 0)}
+.meter::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(to top,transparent 0 5px,var(--groove) 5px 7px)}
+.meter b{position:absolute;left:0;right:0;height:2px;background:#fff;bottom:0;opacity:.85}
+.meter.est i{opacity:.75}
+.outmeter{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr 5.5em;gap:10px;align-items:center;font-size:.75rem;color:#b98636}
+.hm{position:relative;height:14px;border:1px solid #000;border-radius:2px;overflow:hidden;
+  background:linear-gradient(to right,#123222 0 75%,#3a2c0c 75% 94%,#3d1412 94%)}
+.hm i{position:absolute;inset:0;--w:0;background:linear-gradient(to right,var(--green) 0 75%,var(--yellow) 75% 94%,var(--red) 94%);clip-path:inset(0 calc(100% - var(--w)) 0 0)}
+.hm::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(to right,transparent 0 6px,var(--groove) 6px 8px)}
+.hm b{position:absolute;top:0;bottom:0;width:2px;background:#fff;left:0;opacity:.85}
+#outdb{text-align:right;font-variant-numeric:tabular-nums;color:var(--amber)}
+.trim{display:flex;align-items:center;gap:3px;font-size:.75rem;color:var(--muted)}
+.trim input{width:4.6em;text-align:right;padding:3px 4px;font-family:var(--mono);font-size:.78rem}
+.trim input.boost{color:var(--amber);border-color:#6a4a14}
+.basebar{grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:.82rem}
 .scale{position:relative;width:30px;font-family:var(--mono);font-size:.62rem;color:var(--muted)}
 .scale span{position:absolute;right:0;transform:translateY(50%)}
 .scale span.u{color:var(--amber)}
@@ -168,26 +181,26 @@ tr.next td.st .chip{color:var(--green);border-color:var(--green)}
     <div class="l2" id="lcd2">「開始」で自動運行</div>
     <div></div>
     <div class="bar"><i id="lcdBar"></i></div>
+    <div class="outmeter"><span class="key">OUT</span><div class="hm"><i id="m_out"></i><b id="p_out"></b></div><span id="outdb">-∞ dB</span></div>
     <div class="nextrow"><span id="nextLabel">次のキュー：—</span><b id="nextCount">--:--:--</b></div>
   </div>
 
   <div class="console" id="console"></div>
 
   <section>
-    <div class="sechead"><h2>Cue Sheet<small>次の公演までの進行</small></h2></div>
+    <div class="sechead"><h2>Cue Sheet</h2></div>
     <div class="tablewrap"><table><tbody id="cues"></tbody></table></div>
   </section>
 
   <section>
-    <div class="sechead"><h2>Harbor BGM<small>通常時にループ</small></h2></div>
+    <div class="sechead"><h2>Harbor BGM</h2></div>
     <div id="bgmSrc"></div>
     <div class="rowl"><label><input type="checkbox" id="duck"> アナウンス中はBGMを止める（オフなら小さくして重ねる）</label></div>
   </section>
 
   <section>
-    <div class="sechead"><h2>Shows<small>ショーごとの開始前アナウンスと本番の流れ</small></h2>
+    <div class="sechead"><h2>Shows</h2>
       <button class="add" id="addShow">＋ ショーを追加</button></div>
-    <p class="hint">時刻になると「開始前アナウンス」が指定の分数前に流れ、本番は上から順に続けて再生します。閉園アナウンスのように1本だけ流したいものは、本番に1つだけ入れて「終了後」を「BGMを止める」にしてください。休止日は「2026-11-27, 2027-01-06~2027-02-04」のように書けます。</p>
     <div id="shows" style="display:flex;flex-direction:column;gap:12px"></div>
   </section>
 </div>
@@ -217,14 +230,17 @@ const COLORS=['#ffb341','#5ab8ff','#4be08a','#ff7ab8','#b48cff','#ff7a45'];
 /* ===== 設定（旧版からの引き継ぎつき） ===== */
 const CFG_KEY='harbor-console-v2';
 function legacy(k){const u=ls.get('yt_'+k),id=u&&ytId(u);return id?{type:'yt',id,name:u}:{type:'file',key:k,name:'',legacy:true}}
-function defaults(){return{bgm:legacy('bgm'),faders:{bgm:100,ann:100,show:100,master:100},mutes:{},limiter:true,duck:true,shows:[
+function defaults(){return{v:3,base:.5,bgm:legacy('bgm'),faders:{bgm:100,ann:100,show:100,master:100},mutes:{},limiter:true,duck:true,shows:[
   {id:uid(),name:'ビリーヴ!〜シー・オブ・ドリームス〜',time:ls.get('showTime')||'19:30',on:true,after:'bgm',closed:'2026-11-27, 2027-01-06~2027-02-04',
    pre:[{min:60,label:'1時間前アナウンス',src:legacy('a60')},{min:30,label:'30分前アナウンス',src:legacy('a30')},
         {min:15,label:'15分前アナウンス',src:legacy('a15')},{min:5,label:'5分前アナウンス',src:legacy('a5')}],
    seq:[{label:'本編',src:legacy('show')},{label:'君の願いが世界を輝かす',src:legacy('song')},{label:'終了後アナウンス',src:legacy('after')}]},
-  {id:uid(),name:'閉園アナウンス',time:'21:00',on:true,after:'stop',closed:'',pre:[],seq:[{label:'閉園アナウンス',src:null}]}]}}
+  {id:uid(),name:'閉園アナウンス',time:'21:00',on:true,after:'bgm',ch:'ann',closed:'',pre:[],seq:[{label:'閉園アナウンス',src:null}]}]}}
 let cfg=null;try{cfg=JSON.parse(ls.get(CFG_KEY))}catch(e){}
 if(!cfg||!Array.isArray(cfg.shows))cfg=defaults();
+if(!cfg.v||cfg.v<3){cfg.v=3;if(cfg.base==null)cfg.base=.5;
+  cfg.shows.forEach(sh=>{if(/閉園/.test(sh.name)){sh.ch='ann';sh.after='bgm'}});
+  for(const k in cfg.faders)if(cfg.faders[k]>400)cfg.faders[k]=400}
 const save=()=>ls.set(CFG_KEY,JSON.stringify(cfg));
 let durs={};try{durs=JSON.parse(ls.get('harbor-durs'))||{}}catch(e){}
 const srcKey=s=>s?(s.type==='yt'?s.id:s.key):'';
@@ -256,7 +272,7 @@ function ensureCtx(){
   if(ctx){if(ctx.state!=='running')ctx.resume();return}
   try{ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return}
   masterIn=ctx.createGain();comp=ctx.createDynamicsCompressor();
-  comp.threshold.value=-3;comp.knee.value=0;comp.ratio.value=20;comp.attack.value=.002;comp.release.value=.15;
+  comp.threshold.value=-1;comp.knee.value=0;comp.ratio.value=20;comp.attack.value=.002;comp.release.value=.15;
   masterAn=ctx.createAnalyser();masterAn.fftSize=1024;comp.connect(masterAn);masterAn.connect(ctx.destination);
   routeLimiter();bgm.attach();fg.attach();applyAll();
 }
@@ -273,7 +289,9 @@ function makePlayer(divId,loop){
     attach(){if(gain||!ctx)return;const s=ctx.createMediaElementSource(a);gain=ctx.createGain();an=ctx.createAnalyser();an.fftSize=1024;
       s.connect(gain);gain.connect(an);an.connect(masterIn);a.volume=1;P.apply()},
     get an(){return an},get mode(){return mode},get src(){return src},
-    apply(){const v=fv*chan(P.cat),capped=Math.min(1,v*chan('master'));
+    outVol(){return Math.min(1,fv*chan(P.cat)*((src&&src.gain!=null)?+src.gain:100)/100*(cfg.base??1)*chan('master'))},
+    apply(){const t=((src&&src.gain!=null)?+src.gain:100)/100*(cfg.base??1);
+      const v=fv*chan(P.cat)*t,capped=Math.min(1,v*chan('master'));
       if(gain)gain.gain.value=v;else a.volume=capped;
       try{yt&&yt.setVolume&&yt.setVolume(Math.round(capped*100))}catch(e){}},
     setFade(v){fv=Math.max(0,v);P.apply()},get fade(){return fv},
@@ -303,17 +321,19 @@ function fadeTo(p,to,dur,done){clearInterval(fades.get(p));const from=p.fade,st=
 let running=false,ambient='bgm',cur=null,queue=[],fired=new Set(),offset=0,wake=null,bgmKey=null;
 const now=()=>new Date(Date.now()+offset);
 function bgmOn(){ambient='bgm';if(!usable(cfg.bgm)){bgm.stop();bgmKey=null;return}
-  const k=cfg.bgm.type+srcKey(cfg.bgm);bgm.setFade(0);if(bgmKey!==k){bgmKey=k;bgm.play(cfg.bgm)}else bgm.resume();fadeTo(bgm,1,2000)}
+  const k=cfg.bgm.type+srcKey(cfg.bgm);
+  if(bgmKey===k&&bgm.playing){fadeTo(bgm,1,1500);return}
+  bgm.setFade(0);if(bgmKey!==k){bgmKey=k;bgm.play(cfg.bgm)}else bgm.resume();fadeTo(bgm,1,2000)}
 function bgmOff(cb){if(bgm.fade<.01){bgm.pause();cb&&cb();return}fadeTo(bgm,0,1200,()=>{bgm.pause();cb&&cb()})}
 function playEntry(e,seek=0){
-  cur=e;fg.cat=e.kind==='pre'?'ann':'show';fg.apply();
+  cur=e;fg.cat=e.kind==='pre'?'ann':(e.show.ch==='ann'?'ann':'show');fg.apply();
   const go=()=>{if(cur!==e)return;fg.setFade(1);fg.play(e.src,seek).then(()=>setTimeout(()=>{if(cur===e)setDur(e.src,fg.duration())},3000))};
-  if(e.kind==='pre'&&!cfg.duck&&ambient==='bgm'){fadeTo(bgm,.25,800);go()}else bgmOff(go);
+  if(fg.cat==='ann'&&!cfg.duck&&ambient==='bgm'){fadeTo(bgm,.25,800);go()}else bgmOff(go);
 }
 function advance(){const prev=cur;cur=null;
   if(queue.length)return playEntry(queue.shift());
   if(prev&&prev.kind==='seq'){if(prev.show.after==='stop'){ambient='silent';bgmOff()}else bgmOn();return}
-  if(ambient==='bgm'){if(!cfg.duck&&bgm.playing)fadeTo(bgm,1,1500);else bgmOn()}
+  if(ambient==='bgm')bgmOn()
 }
 fg.onend=()=>{if(cur)advance()};
 function startSeq(show,seek=0,from=0){
@@ -370,7 +390,7 @@ function renderStatus(n){
   $('lamp').classList.toggle('on',running&&(!!cur||bgm.playing));
   $('runBtn').textContent=running?'停止':'開始';$('runBtn').classList.toggle('on',running);
   let l1,l2,t=0,d=0;
-  if(cur){l1=cur.label;l2=cur.show.name+(cur.kind==='pre'?'・開始前アナウンス':'・本番');t=fg.time();d=fg.duration()||durOf(cur.src)}
+  if(cur){l1=cur.label;l2=cur.show.name+(cur.kind==='pre'?'・開始前アナウンス':fg.cat==='ann'?'・アナウンス':'・本番');t=fg.time();d=fg.duration()||durOf(cur.src)}
   else if(running&&ambient==='bgm'&&usable(cfg.bgm)){l1='ハーバーBGM';l2=cfg.bgm.name||'';t=bgm.time();d=bgm.duration()}
   else if(running){l1=ambient==='silent'?'無音（BGM停止中）':'BGM未設定';l2='次のキューを待機中'}
   else{l1='STOP';l2='「開始」で自動運行'}
@@ -398,7 +418,7 @@ function renderCues(n,force){
     else if(c.t<=n){cls='done';st='<span class="chip">済</span>'}
     else if(!nextMarked&&c.kind!=='end'){nextMarked=true;cls='next';st='<span class="chip">NEXT</span>'}
     const dt=key(c.t)===today?'':(c.t.getMonth()+1)+'/'+c.t.getDate()+' ';
-    const kind=c.kind==='pre'?`${c.show.pre[c.idx].min}分前`:c.kind==='seq'?'本番':'終了後';
+    const kind=c.kind==='pre'?`${c.show.pre[c.idx].min}分前`:c.kind==='seq'?(c.show.ch==='ann'?'アナウンス':'本番'):'終了後';
     const miss=c.kind!=='end'&&!usable(c.src)?' <span class="warn">音源なし（飛ばします）</span>':'';
     return `<tr class="${cls}"><td class="tm">${dt}${hm(c.t)}</td><td><span class="dot" style="background:${c.c}"></span>${esc(c.show.name)}</td><td><span class="chip">${kind}</span> ${esc(c.label)}${miss}</td><td class="st">${st}</td></tr>`}).join('')
     ||'<tr><td colspan="4" style="color:var(--muted)">有効なショーがありません。下の「Shows」で追加してください。</td></tr>';
@@ -406,24 +426,26 @@ function renderCues(n,force){
 }
 
 /* ===== チャンネルストリップ ===== */
-const STRIPS=[{c:'bgm',n:'BGM',s:'ハーバー'},{c:'ann',n:'ANNOUNCE',s:'開始前アナウンス'},{c:'show',n:'SHOW',s:'本番・閉園など'},{c:'master',n:'MASTER',s:'全体'}];
-const MAX=200,marks=[200,150,100,50,0];
+const STRIPS=[{c:'bgm',n:'BGM'},{c:'ann',n:'ANNOUNCE'},{c:'show',n:'SHOW'},{c:'master',n:'MASTER'}];
+const MAX=400,marks=[400,200,100,50,25,0];
+const posOf=v=>Math.sqrt(Math.max(0,v)/MAX),valOf=p=>MAX*Math.max(0,Math.min(1,p))**2;
 $('console').innerHTML=STRIPS.map(s=>`<div class="strip ${s.c==='master'?'master':''}" data-c="${s.c}">
-  <div class="chname">${s.n}</div><div class="chsub">${s.s}</div>
+  <div class="chname">${s.n}</div>
   ${s.c!=='master'?`<span class="ytled" id="yt_${s.c}">YouTube</span>`:'<span class="ytled" style="visibility:hidden">-</span>'}
-  <div class="mf"><div class="meter"><i id="m_${s.c}"></i><b id="p_${s.c}"></b></div>
-    <div class="scale">${marks.map(v=>`<span class="${v===100?'u':''}" style="bottom:calc(11px + ${v/MAX} * (100% - 22px))">${v===100?'0dB':v}</span>`).join('')}</div>
+  <div class="mf"><div class="meter" id="mw_${s.c}"><i id="m_${s.c}"></i><b id="p_${s.c}"></b></div>
+    <div class="scale">${marks.map(v=>`<span class="${v===100?'u':''}" style="bottom:calc(11px + ${posOf(v)} * (100% - 22px))">${v===100?'0dB':v===0?'∞':(v>100?'+':'')+(20*Math.log10(v/100)).toFixed(0)}</span>`).join('')}</div>
     <div class="fader" id="f_${s.c}" role="slider" tabindex="0" aria-label="${s.n} 音量" aria-valuemin="0" aria-valuemax="${MAX}"><div class="cap"></div></div></div>
   <div class="val" id="v_${s.c}"></div>
   <div class="sbtns"><button class="key mute" id="mu_${s.c}">Mute</button>${s.c==='master'?'<button class="key lim" id="lim">Limit</button>':''}</div>
-</div>`).join('')+'<p class="consolenote">フェーダーは0〜200%（ダブルクリックで100%に戻る）。100%を超える増幅は音声ファイルだけに効き、YouTubeは100%が上限です。LIMITをオンにすると、上げすぎても音割れしにくくなります。</p>';
-function drawFader(c){const v=cfg.faders[c]??100,p=v/MAX,el=$('f_'+c);
-  el.querySelector('.cap').style.bottom=`calc(${p} * (100% - 22px))`;el.setAttribute('aria-valuenow',v);
+</div>`).join('')+`<div class="basebar"><span class="key">基準レベル</span><select id="base" aria-label="基準レベル">
+  <option value="1">0 dB（余裕なし）</option><option value="0.5">−6 dB（2倍まで上げられる）</option><option value="0.25">−12 dB（4倍まで上げられる）</option></select></div>`;
+function drawFader(c){const v=cfg.faders[c]??100,el=$('f_'+c);
+  el.querySelector('.cap').style.bottom=`calc(${posOf(v)} * (100% - 22px))`;el.setAttribute('aria-valuenow',v);
   const dbv=v===0?'-∞':(20*Math.log10(v/100)).toFixed(1);$('v_'+c).innerHTML=`${v}%<small>${v>100?'+':''}${dbv} dB</small>`;
   $('mu_'+c).classList.toggle('on',!!cfg.mutes[c])}
 STRIPS.forEach(({c})=>{const el=$('f_'+c);
   const set=v=>{cfg.faders[c]=Math.round(Math.max(0,Math.min(MAX,v)));drawFader(c);applyAll();save()};
-  const fromY=e=>{const r=el.getBoundingClientRect();return (1-(e.clientY-r.top-11)/(r.height-22))*MAX};
+  const fromY=e=>{const r=el.getBoundingClientRect();const v=valOf(1-(e.clientY-r.top-11)/(r.height-22));return Math.abs(v-100)<6?100:v};
   el.addEventListener('pointerdown',e=>{ensureCtx();el.setPointerCapture(e.pointerId);set(fromY(e))});
   el.addEventListener('pointermove',e=>{if(el.hasPointerCapture(e.pointerId))set(fromY(e))});
   el.addEventListener('dblclick',()=>set(100));
@@ -432,20 +454,31 @@ STRIPS.forEach(({c})=>{const el=$('f_'+c);
     else if(e.key==='Home'){set(0);e.preventDefault()}else if(e.key==='End'){set(MAX);e.preventDefault()}});
   $('mu_'+c).onclick=()=>{cfg.mutes[c]=!cfg.mutes[c];drawFader(c);applyAll();save()};
   drawFader(c)});
+$('base').value=String(cfg.base??1);
+$('base').onchange=e=>{cfg.base=+e.target.value;applyAll();save()};
 const limBtn=$('lim');const drawLim=()=>limBtn.classList.toggle('on',!!cfg.limiter);drawLim();
 limBtn.onclick=()=>{cfg.limiter=!cfg.limiter;drawLim();routeLimiter();save()};
 
 /* メーター */
-const buf=new Float32Array(1024),peaks={bgm:0,ann:0,show:0,master:0};
+const buf=new Float32Array(1024),peaks={bgm:0,ann:0,show:0,master:0,out:0};
 function level(an){if(!an)return 0;an.getFloatTimeDomainData(buf);let s=0;for(let i=0;i<buf.length;i++)s+=buf[i]*buf[i];return Math.sqrt(s/buf.length)}
+const toP=x=>Math.max(0,Math.min(1,(20*Math.log10(x+1e-7)+48)/48));
+function ytEst(p){if(p.mode!=='yt'||!p.playing)return 0;const t=performance.now()/1000;
+  return p.outVol()*.32*(0.8+0.12*Math.sin(t*7.3)+0.08*Math.sin(t*17.1))}
 function meters(){
-  const fl=cur?level(fg.an):0;
-  const L={bgm:level(bgm.an),ann:fg.cat==='ann'?fl:0,show:fg.cat==='show'?fl:0,master:masterAn?level(masterAn):0};
-  for(const c in L){const dbv=20*Math.log10(L[c]+1e-7);const p=Math.max(0,Math.min(1,(dbv+54)/54));
-    peaks[c]=Math.max(p,peaks[c]-.006);$('m_'+c).style.height=p*100+'%';$('p_'+c).style.bottom=`calc(${peaks[c]*100}% - 2px)`}
-  $('yt_bgm').classList.toggle('on',bgm.mode==='yt'&&bgm.playing);
-  $('yt_ann').classList.toggle('on',!!cur&&fg.cat==='ann'&&fg.mode==='yt');
-  $('yt_show').classList.toggle('on',!!cur&&fg.cat==='show'&&fg.mode==='yt');
+  const fl=cur?(fg.mode==='yt'?ytEst(fg):level(fg.an)):0,bl=bgm.mode==='yt'?ytEst(bgm):level(bgm.an);
+  const est={bgm:bgm.mode==='yt',ann:!!cur&&fg.cat==='ann'&&fg.mode==='yt',show:!!cur&&fg.cat==='show'&&fg.mode==='yt'};
+  const L={bgm:bl,ann:fg.cat==='ann'?fl:0,show:fg.cat==='show'?fl:0};
+  const realM=masterAn?level(masterAn):0,ytM=(est.bgm?bl:0)+((est.ann||est.show)?fl:0);
+  L.master=Math.min(1,Math.sqrt(realM*realM+ytM*ytM));L.out=L.master;
+  for(const c in L){const p=toP(L[c]);peaks[c]=Math.max(p,peaks[c]-.005);
+    if(c==='out'){$('m_out').style.setProperty('--w',p*100+'%');$('p_out').style.left=`calc(${peaks.out*100}% - 2px)`;
+      $('outdb').textContent=L.out>1e-4?(20*Math.log10(L.out)).toFixed(1)+' dB':'-∞ dB';continue}
+    const m=$('m_'+c);m.style.setProperty('--h',p*100+'%');$('p_'+c).style.bottom=`calc(${peaks[c]*100}% - 2px)`;
+    m.parentElement.classList.toggle('est',!!est[c])}
+  $('yt_bgm').classList.toggle('on',est.bgm&&bgm.playing);
+  $('yt_ann').classList.toggle('on',est.ann);
+  $('yt_show').classList.toggle('on',est.show);
   requestAnimationFrame(meters)}
 requestAnimationFrame(meters);
 
@@ -453,7 +486,9 @@ requestAnimationFrame(meters);
 function srcWidget(path,s){
   const lab=!s?'<span class="nm none">未設定</span>':s.type==='yt'?`<span class="nm"><span class="tag yt">YouTube</span>${esc(s.name)}</span>`
     :usable(s)?`<span class="nm"><span class="tag fl">FILE</span>${esc(s.name||blobs[s.key].name)}</span>`:'<span class="nm none">未設定</span>';
-  return `<div class="src" data-path="${path}">${lab}<button data-act="file">ファイル</button><input placeholder="YouTubeのURL" value="${s&&s.type==='yt'?esc(s.name):''}" aria-label="YouTubeのURL"><button data-act="yt">設定</button>${s?'<button data-act="clr" title="音源を外す">×</button>':''}</div>`}
+  const g=s&&s.gain!=null?+s.gain:100;
+  const trim=s?`<label class="trim" title="この音源だけの音量">音量<input type="number" class="trimin ${g>100?'boost':''}" min="0" max="1600" step="10" value="${g}">%</label>${usable(s)&&s.type==='file'?'<button data-act="auto" title="ファイルを解析して音量をそろえる">自動</button>':''}`:'';
+  return `<div class="src" data-path="${path}">${lab}<button data-act="file">ファイル</button><input class="urlin" placeholder="YouTubeのURL" value="${s&&s.type==='yt'?esc(s.name):''}" aria-label="YouTubeのURL"><button data-act="yt">設定</button>${trim}${s?'<button data-act="clr" title="音源を外す">×</button>':''}</div>`}
 function ref(path){if(path==='bgm')return{o:cfg,p:'bgm'};const [,sid,list,i]=path.split('|');const sh=cfg.shows.find(x=>x.id===sid);return sh?{o:sh[list][+i],p:'src'}:null}
 function renderBgm(){$('bgmSrc').innerHTML=srcWidget('bgm',cfg.bgm);$('duck').checked=!!cfg.duck}
 function renderShows(){
@@ -467,7 +502,8 @@ function renderShows(){
       <button data-act="del" title="このショーを削除">削除</button>
     </div>
     <div class="showbody">
-      <div class="rowl"><label>終了後 <select data-f="after"><option value="bgm" ${sh.after!=='stop'?'selected':''}>BGMに戻る</option><option value="stop" ${sh.after==='stop'?'selected':''}>BGMを止める</option></select></label>
+      <div class="rowl"><label>送出先 <select data-f="ch"><option value="show" ${sh.ch!=='ann'?'selected':''}>SHOW</option><option value="ann" ${sh.ch==='ann'?'selected':''}>ANNOUNCE</option></select></label>
+        <label>終了後 <select data-f="after"><option value="bgm" ${sh.after!=='stop'?'selected':''}>BGMに戻る</option><option value="stop" ${sh.after==='stop'?'selected':''}>BGMを止める</option></select></label>
         <label style="flex:1 1 260px">休止日 <input data-f="closed" value="${esc(sh.closed)}" placeholder="例 2026-11-27, 2027-01-06~2027-02-04" style="flex:1"></label></div>
       <div class="cap-label">開始前アナウンス</div>
       <div class="items">${sh.pre.map((p,i)=>`<div class="item">
@@ -476,7 +512,7 @@ function renderShows(){
         ${srcWidget(`s|${sh.id}|pre|${i}`,p.src)}
         <span class="acts"><button data-act="firepre" data-i="${i}" title="今すぐ送出">▶</button><button data-act="delpre" data-i="${i}" title="削除">×</button></span></div>`).join('')||'<span class="hint">なし</span>'}</div>
       <button class="add" data-act="addpre">＋ アナウンスを追加</button>
-      <div class="cap-label">本番（上から順に再生）</div>
+      <div class="cap-label">${sh.ch==='ann'?'アナウンス':'本番'}（上から順に再生）</div>
       <div class="items">${sh.seq.map((p,i)=>`<div class="item">
         <span class="n">#${i+1}</span>
         <input data-f="slabel" data-i="${i}" value="${esc(p.label)}" aria-label="名前">
@@ -488,17 +524,29 @@ function renderShows(){
 function changed(structural){save();closedCache.clear();if(running)markPast();if(structural)renderShows();renderCues(now(),true)}
 let pickPath=null;
 $('picker').onchange=e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f||!pickPath)return;const r=ref(pickPath);if(!r)return;
-  const k=uid();addBlob(k,f,f.name);dbPut(k,{blob:f,name:f.name});r.o[r.p]={type:'file',key:k,name:f.name};
+  const k=uid();addBlob(k,f,f.name);dbPut(k,{blob:f,name:f.name});r.o[r.p]={type:'file',key:k,name:f.name,gain:100};
   if(pickPath==='bgm'){renderBgm();save();if(running&&ambient==='bgm'&&!cur)bgmOn()}else changed(true)};
 function srcClick(e){const b=e.target.closest('button[data-act]');const w=e.target.closest('.src');if(!b||!w)return false;const path=w.dataset.path,r=ref(path);if(!r)return true;
   const act=b.dataset.act;
   if(act==='file'){pickPath=path;$('picker').click();return true}
-  if(act==='yt'){const inp=w.querySelector('input'),id=ytId(inp.value);if(!id){inp.value='';inp.placeholder='URLを読み取れませんでした';inp.style.borderColor='var(--red)';return true}
-    r.o[r.p]={type:'yt',id,name:inp.value.trim()}}
+  if(act==='auto'){autoGain(r.o[r.p],b,path);return true}
+  if(act==='yt'){const inp=w.querySelector('.urlin'),id=ytId(inp.value);if(!id){inp.value='';inp.placeholder='URLを読み取れませんでした';inp.style.borderColor='var(--red)';return true}
+    const old=r.o[r.p];r.o[r.p]={type:'yt',id,name:inp.value.trim(),gain:old&&old.gain!=null?old.gain:100}}
   if(act==='clr')r.o[r.p]=null;
   if(path==='bgm'){renderBgm();save();if(running&&ambient==='bgm'&&!cur){bgmKey=null;usable(cfg.bgm)?bgmOn():bgmOff()}}else changed(true);
   return true}
 $('bgmSrc').onclick=srcClick;
+function trimChange(e){if(!e.target.classList.contains('trimin'))return false;const w=e.target.closest('.src'),r=ref(w.dataset.path);if(!r||!r.o[r.p])return true;
+  const v=Math.max(0,Math.min(1600,Math.round(+e.target.value||0)));e.target.value=v;r.o[r.p].gain=v;e.target.classList.toggle('boost',v>100);
+  save();bgm.apply();fg.apply();return true}
+$('bgmSrc').addEventListener('change',trimChange);
+async function autoGain(s,btn,path){if(!s||s.type!=='file'||!blobs[s.key])return;btn.disabled=true;btn.textContent='解析中…';
+  try{const ab=await blobs[s.key].blob.arrayBuffer();const oc=new OfflineAudioContext(1,1,8000);const au=await oc.decodeAudioData(ab);
+    let sum=0,n=0;for(let c=0;c<au.numberOfChannels;c++){const d=au.getChannelData(c);for(let i=0;i<d.length;i+=2){sum+=d[i]*d[i];n++}}
+    const rms=20*Math.log10(Math.sqrt(sum/Math.max(1,n))+1e-9);
+    s.gain=Math.max(10,Math.min(1600,Math.round(Math.pow(10,(-16-rms)/20)*100/5)*5));save();bgm.apply();fg.apply();
+    if(path==='bgm')renderBgm();else renderShows()}
+  catch(err){btn.textContent='解析できません';setTimeout(()=>{btn.textContent='自動';btn.disabled=false},2500)}}
 $('duck').onchange=e=>{cfg.duck=e.target.checked;save()};
 $('shows').addEventListener('click',e=>{if(srcClick(e))return;const b=e.target.closest('button[data-act]');if(!b)return;
   const sh=cfg.shows.find(x=>x.id===b.closest('.show').dataset.sid);if(!sh)return;const i=+b.dataset.i,act=b.dataset.act;
@@ -513,10 +561,10 @@ $('shows').addEventListener('click',e=>{if(srcClick(e))return;const b=e.target.c
   if(act==='delseq')sh.seq.splice(i,1);
   if(act==='up'&&i>0){const t=sh.seq[i-1];sh.seq[i-1]=sh.seq[i];sh.seq[i]=t}
   changed(true)});
-$('shows').addEventListener('change',e=>{const f=e.target.dataset.f;if(!f)return;const sh=cfg.shows.find(x=>x.id===e.target.closest('.show').dataset.sid);if(!sh)return;
+$('shows').addEventListener('change',e=>{if(trimChange(e))return;const f=e.target.dataset.f;if(!f)return;const sh=cfg.shows.find(x=>x.id===e.target.closest('.show').dataset.sid);if(!sh)return;
   const i=+e.target.dataset.i,v=e.target.type==='checkbox'?e.target.checked:e.target.value;
   if(f==='pmin')sh.pre[i].min=Math.max(0,+v||0);else if(f==='plabel')sh.pre[i].label=v;else if(f==='slabel')sh.seq[i].label=v;else sh[f]=v;
-  changed(f==='on')});
+  changed(f==='on'||f==='ch')});
 $('addShow').onclick=()=>{cfg.shows.push({id:uid(),name:'新しいショー',time:'20:00',on:true,after:'bgm',closed:'',
   pre:[{min:5,label:'5分前アナウンス',src:null}],seq:[{label:'本編',src:null}]});changed(true)};
 
